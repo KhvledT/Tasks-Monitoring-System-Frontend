@@ -1,6 +1,6 @@
-import React from 'react';
-import { Outlet } from 'react-router';
-import Login_Image from '../assets/Login_Image.jpg';
+import React from "react";
+import { Outlet } from "react-router";
+import Login_Image from "../assets/Login_Image.webp";
 
 export const AuthLayout: React.FC = () => {
   return (
@@ -8,8 +8,8 @@ export const AuthLayout: React.FC = () => {
       {/* Left side: Collage / Branding */}
       <div className="hidden md:flex md:w-[60%] relative flex-col justify-between p-12 bg-zinc-900 text-white overflow-hidden select-none">
         {/* Background collage image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-85 z-0" 
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-85 z-0"
           style={{ backgroundImage: `url(${Login_Image})` }}
         />
         {/* Gradient Overlay */}
@@ -18,8 +18,19 @@ export const AuthLayout: React.FC = () => {
         {/* Brand Header */}
         <div className="relative z-20 flex items-center gap-2">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white border border-white/20 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5.5 h-5.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-5.5 h-5.5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-.778.099-1.533.284-2.253"
+              />
             </svg>
           </div>
           <span className="text-xl font-bold tracking-tight">MTMS</span>
@@ -28,10 +39,14 @@ export const AuthLayout: React.FC = () => {
         {/* Main Title & Description */}
         <div className="relative z-20 max-w-xl my-auto flex flex-col gap-4">
           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
-            Maritime Tasks<br />Monitoring System
+            Maritime Tasks
+            <br />
+            Monitoring System
           </h1>
           <p className="text-gray-200 text-sm leading-relaxed font-normal">
-            A centralized platform for vessel operations, fleet logistics, and real-time maintenance monitoring. Designed for precision in the world's most demanding environments.
+            A centralized platform for vessel operations, fleet logistics, and
+            real-time maintenance monitoring. Designed for precision in the
+            world's most demanding environments.
           </p>
         </div>
 
