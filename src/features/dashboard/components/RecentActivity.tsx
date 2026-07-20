@@ -40,6 +40,22 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
     }
   };
 
+  const getStatusDetails = (status: string | number) => {
+    const s = String(status).toLowerCase();
+    if (s === 'postponed' || s === '2') {
+      return {
+        label: 'Postponed',
+        textClass: 'text-amber-400',
+        dotBg: 'bg-amber-500',
+      };
+    }
+    return {
+      label: 'Completed',
+      textClass: 'text-emerald-400',
+      dotBg: 'bg-emerald-500',
+    };
+  };
+
   return (
     <Card className="border border-zinc-900 bg-zinc-950/40 p-6 backdrop-blur-md hover:border-zinc-850 transition duration-350">
       <div className="flex items-center justify-between border-b border-zinc-900/60 pb-4 mb-5">
@@ -53,43 +69,46 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
       </div>
 
       <div className="flex flex-col gap-4">
-        {activities.map((activity) => (
-          <div
-            key={activity.id}
-            className="flex flex-col gap-2 py-3.5 px-4 rounded-xl bg-zinc-950/60 border border-zinc-900/50 hover:border-zinc-850 hover:bg-zinc-950 transition duration-200"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-2.5 min-w-0">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 mt-1.5" />
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-zinc-200 tracking-tight leading-snug truncate">
-                    {activity.taskTitle}
-                  </p>
-                  <p className="text-[10px] font-bold text-zinc-550 uppercase tracking-wider mt-0.5">
-                    {activity.categoryName || 'General operational check'}
-                  </p>
+        {activities.map((activity) => {
+          const statusDetails = getStatusDetails(activity.status);
+          return (
+            <div
+              key={activity.id}
+              className="flex flex-col gap-2 py-3.5 px-4 rounded-xl bg-zinc-950/60 border border-zinc-900/50 hover:border-zinc-850 hover:bg-zinc-950 transition duration-200"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <span className={`w-2 h-2 rounded-full ${statusDetails.dotBg} animate-pulse shrink-0 mt-1.5`} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-zinc-200 tracking-tight leading-snug truncate">
+                      {activity.taskTitle}
+                    </p>
+                    <p className="text-[10px] font-bold text-zinc-550 uppercase tracking-wider mt-0.5">
+                      {activity.categoryName || 'General operational check'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${getGroupBadgeColor(activity.taskGroup)}`}>
+                    {activity.taskGroup}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${getGroupBadgeColor(activity.taskGroup)}`}>
-                  {activity.taskGroup}
-                </span>
+              {activity.notes && (
+                <div className="text-xs text-zinc-400 bg-zinc-900/20 border-l-2 border-zinc-700 pl-2.5 py-1 my-1 italic">
+                  {activity.notes}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium border-t border-zinc-900/60 pt-2 mt-1">
+                <span>Status: <span className={`font-semibold uppercase ${statusDetails.textClass}`}>{statusDetails.label}</span></span>
+                <span className="font-mono">{formatTime(activity.completionDate)}</span>
               </div>
             </div>
-
-            {activity.notes && (
-              <div className="text-xs text-zinc-400 bg-zinc-900/20 border-l-2 border-zinc-700 pl-2.5 py-1 my-1 italic">
-                {activity.notes}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between text-[10px] text-zinc-500 font-medium border-t border-zinc-900/60 pt-2 mt-1">
-              <span>Status: <span className="text-emerald-400 font-semibold uppercase">Completed</span></span>
-              <span className="font-mono">{formatTime(activity.completionDate)}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );

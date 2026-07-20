@@ -6,55 +6,56 @@ import { ROUTES } from '../../../constants/routes';
 
 interface MetricsGridProps {
   metrics: DashboardMetrics;
+  overdueCount?: number;
+  upcomingCount?: number;
+  dailyStats?: { completed: number; total: number };
 }
 
-export const MetricsGrid: React.FC<MetricsGridProps> = ({ metrics }) => {
-  const {
-    complianceRate = 0,
-    completedCount = 0,
-    pendingCount = 0,
-    postponedCount = 0,
-    activeIssues = 0,
-  } = metrics;
+export const MetricsGrid: React.FC<MetricsGridProps> = ({
+  metrics,
+  overdueCount = 0,
+  upcomingCount = 0,
+  dailyStats = { completed: 0, total: 0 },
+}) => {
+  const { complianceRate = 0 } = metrics;
 
-  const totalToday = completedCount + pendingCount + postponedCount;
-  const completionPercentage = totalToday > 0 ? (completedCount / totalToday) * 100 : 0;
-  const completionSubtitle = `${completedCount} / ${totalToday} tasks`;
+  const dailyPercentage = dailyStats.total > 0 ? (dailyStats.completed / dailyStats.total) * 100 : 0;
+  const dailySubtitle = `${dailyStats.completed} / ${dailyStats.total} completed`;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {/* 1. Compliance Score circular gauge */}
+      {/* 1. Circular Gauge Compliance score */}
       <ProgressCard
         title="Compliance Score"
-        description="Vessel safety & regulatory checklist compliance rating"
+        description="Overall vessel safety & regulatory compliance rating"
         type="circular"
         value={complianceRate}
       />
 
-      {/* 2. Today's Task Completion progress */}
+      {/* 2. Daily Tasks Completion */}
       <ProgressCard
-        title="Today's Completion"
-        description="Operational checklist task completion progress"
+        title="Daily Tasks"
+        description="Completed vs total daily operational checklists"
         type="linear"
-        value={completionPercentage}
-        subtitle={completionSubtitle}
+        value={dailyPercentage}
+        subtitle={dailySubtitle}
       />
 
-      {/* 3. Active Issues count card */}
+      {/* 3. Overdue Tasks */}
       <StatisticsCard
-        title="Active Issues"
-        count={activeIssues}
-        description="Vessel defects or task execution problems logged"
-        badgeColor={activeIssues > 0 ? 'red' : 'zinc'}
-        linkTo={ROUTES.ISSUES}
+        title="Overdue Tasks"
+        count={overdueCount}
+        description="Postponed tasks or tasks with active unresolved issues"
+        badgeColor={overdueCount > 0 ? 'red' : 'zinc'}
       />
 
-      {/* 4. Postponed Tasks count card */}
+      {/* 4. Upcoming Tasks */}
       <StatisticsCard
-        title="Postponed Tasks"
-        count={postponedCount}
-        description="Checklist tasks postponed with operational justification"
-        badgeColor={postponedCount > 0 ? 'amber' : 'zinc'}
+        title="Upcoming Tasks"
+        count={upcomingCount}
+        description="Remaining pending checklist tasks to be verified"
+        badgeColor={upcomingCount > 0 ? 'blue' : 'zinc'}
+        linkTo={ROUTES.CHECKLISTS}
       />
     </div>
   );

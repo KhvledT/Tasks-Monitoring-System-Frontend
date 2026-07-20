@@ -9,6 +9,7 @@ export interface ChecklistTask {
   notes?: string;
   measurement?: string;
   postponedReason?: string;
+  hasIssue?: boolean;
 }
 
 export interface ChecklistCategoryGroup {

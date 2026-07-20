@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
 export interface UseIssueFiltersResult {
-  sortBy: 'date' | 'task';
-  setSortBy: (sort: 'date' | 'task') => void;
+  sortBy: 'date' | 'task' | 'severity';
+  setSortBy: (sort: 'date' | 'task' | 'severity') => void;
 }
 
 export const useIssueFilters = (): UseIssueFiltersResult => {
-  const [sortBy, setSortBy] = useState<'date' | 'task'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'task' | 'severity'>('date');
 
   return {
     sortBy,

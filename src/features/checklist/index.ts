@@ -1,4 +1,3 @@
-export * from './pages/ChecklistsPage';
 export * from './hooks/useChecklist';
 export * from './hooks/useChecklistDate';
 export * from './hooks/useChecklistTasks';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { IssueFormValues } from '../hooks/useIssueForm';
 import type { AvailableTaskOption } from '../types/issue.types';
@@ -24,6 +24,21 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
   onCancel,
 }) => {
   const { register, formState: { errors } } = form;
+
+  // Escape key handler to close the modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onCancel]);
 
   return (
     <AnimatePresence>
@@ -74,7 +89,8 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 </label>
                 <select
                   {...register('taskRecordId')}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-250 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 transition cursor-pointer"
+                  disabled={isLoading}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-250 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 transition cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <option value="" className="bg-zinc-950 text-zinc-400">
                     -- Select a Task --
@@ -92,6 +108,28 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 )}
               </div>
 
+              {/* Severity Dropdown */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-zinc-450">
+                  Operational Severity <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('severity')}
+                  disabled={isLoading}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-250 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 transition cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <option value="MINOR" className="bg-zinc-950 text-zinc-200">MINOR (Slight defect / maintenance log)</option>
+                  <option value="MAJOR" className="bg-zinc-950 text-zinc-200">MAJOR (Defect requires attention)</option>
+                  <option value="CRITICAL" className="bg-zinc-950 text-zinc-200">CRITICAL (Vessel safety/operation risk)</option>
+                  <option value="OBSERVATION" className="bg-zinc-950 text-zinc-200">OBSERVATION (General audit observation)</option>
+                </select>
+                {errors.severity && (
+                  <span className="text-[11px] text-red-400 font-medium mt-0.5">
+                    {errors.severity.message}
+                  </span>
+                )}
+              </div>
+
               {/* Description Input */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-zinc-450">
@@ -99,9 +137,10 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 </label>
                 <textarea
                   {...register('description')}
+                  disabled={isLoading}
                   placeholder="Describe the leak, warning alarms, or damage found..."
                   rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-650 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-650 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none disabled:opacity-50 disabled:pointer-events-none"
                 />
                 {errors.description && (
                   <span className="text-[11px] text-red-400 font-medium mt-0.5">
@@ -115,9 +154,10 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 <label className="text-xs font-semibold text-zinc-450">Notes / Comments</label>
                 <textarea
                   {...register('note')}
+                  disabled={isLoading}
                   placeholder="e.g. Chief Engineer notified. Spare parts requested."
                   rows={2}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-650 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-650 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none disabled:opacity-50 disabled:pointer-events-none"
                 />
                 {errors.note && (
                   <span className="text-[11px] text-red-400 font-medium mt-0.5">
@@ -135,8 +175,9 @@ export const CreateIssueModal: React.FC<CreateIssueModalProps> = ({
                 <input
                   type="text"
                   {...register('imageUrl')}
+                  disabled={isLoading}
                   placeholder="e.g. https://example.com/attachments/leak.png"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-655 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-655 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 disabled:opacity-50 disabled:pointer-events-none"
                 />
                 {errors.imageUrl && (
                   <span className="text-[11px] text-red-400 font-medium mt-0.5">

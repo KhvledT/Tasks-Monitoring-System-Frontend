@@ -8,7 +8,14 @@ export interface IssueItem {
   note?: string;
   imageUrl?: IssueImageValue;
   issueDate: string;
+  severity?: 'CRITICAL' | 'MAJOR' | 'MINOR' | 'OBSERVATION';
+  watchSessionId?: string | null;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  resolutionNotes?: string | null;
+  resolvedAt?: string | null;
+  reporterName?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateIssueRequest {
@@ -17,6 +24,7 @@ export interface CreateIssueRequest {
   note?: string;
   imageUrl?: IssueImageValue;
   issueDate: string;
+  severity?: 'CRITICAL' | 'MAJOR' | 'MINOR' | 'OBSERVATION';
 }
 
 export interface AvailableTaskOption {

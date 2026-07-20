@@ -7,25 +7,40 @@ export const historyApi = {
     page: number,
     limit: number,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    search?: string,
+    taskGroup?: string,
+    status?: number,
+    signal?: AbortSignal
   ): Promise<HistoryListResponse> => {
     const response = await apiClient.get<HistoryListResponse>('/history', {
-      params: { vesselId, page, limit, startDate, endDate },
+      params: { vesselId, page, limit, startDate, endDate, search, taskGroup, status },
+      signal,
     });
     return response.data;
   },
 
-  exportPdf: async (vesselId: string, startDate?: string, endDate?: string): Promise<Blob> => {
-    const response = await apiClient.get('/export/pdf', {
-      params: { vesselId, startDate, endDate },
+  exportPdf: async (
+    vesselId: string,
+    config: any
+  ): Promise<Blob> => {
+    const response = await apiClient.post('/export/pdf', {
+      vesselId,
+      ...config
+    }, {
       responseType: 'blob',
     });
     return response.data;
   },
 
-  exportExcel: async (vesselId: string, startDate?: string, endDate?: string): Promise<Blob> => {
-    const response = await apiClient.get('/export/excel', {
-      params: { vesselId, startDate, endDate },
+  exportExcel: async (
+    vesselId: string,
+    config: any
+  ): Promise<Blob> => {
+    const response = await apiClient.post('/export/excel', {
+      vesselId,
+      ...config
+    }, {
       responseType: 'blob',
     });
     return response.data;

@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 interface TaskCardProps {
   task: ChecklistTask;
   onAction: (task: ChecklistTask, action: 'complete' | 'postpone') => void;
+  isArchiveMode?: boolean;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onAction }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onAction, isArchiveMode }) => {
   const statusStr = String(task.status).toLowerCase();
   const isPending = statusStr !== 'completed' && statusStr !== 'postponed' && statusStr !== '1' && statusStr !== '2';
 
@@ -47,47 +48,49 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onAction }) => {
         )}
       </div>
 
-      <div className="flex items-center gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 shrink-0">
-        {isPending ? (
-          <>
+      {!isArchiveMode && (
+        <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 focus-within:opacity-100 group-focus-within:opacity-100 transition-all duration-200 shrink-0">
+          {isPending ? (
+            <>
+              <button
+                onClick={() => onAction(task, 'complete')}
+                type="button"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-955/40 hover:bg-emerald-900/30 border border-emerald-900/50 text-emerald-400 text-xs font-semibold rounded-lg transition active:scale-[0.97] focus:ring-2 focus:ring-emerald-500/60 focus:outline-none cursor-pointer"
+                title="Complete Task"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                Complete
+              </button>
+              <button
+                onClick={() => onAction(task, 'postpone')}
+                type="button"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-955/40 hover:bg-amber-900/30 border border-amber-900/50 text-amber-400 text-xs font-semibold rounded-lg transition active:scale-[0.97] focus:ring-2 focus:ring-amber-500/60 focus:outline-none cursor-pointer"
+                title="Postpone Task"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                Postpone
+              </button>
+            </>
+          ) : (
+            /* Re-open / reset actions to allow editing states */
             <button
               onClick={() => onAction(task, 'complete')}
               type="button"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/30 border border-emerald-900/50 text-emerald-400 text-xs font-semibold rounded-lg transition active:scale-[0.97]"
-              title="Complete Task"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 text-xs font-medium rounded-lg transition active:scale-[0.97] focus:ring-2 focus:ring-zinc-600/50 focus:outline-none cursor-pointer"
+              title="Edit Logs"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
               </svg>
-              Complete
+              Edit Logs
             </button>
-            <button
-              onClick={() => onAction(task, 'postpone')}
-              type="button"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-950/40 hover:bg-amber-900/30 border border-amber-900/50 text-amber-400 text-xs font-semibold rounded-lg transition active:scale-[0.97]"
-              title="Postpone Task"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-              Postpone
-            </button>
-          </>
-        ) : (
-          /* Re-open / reset actions to allow editing states */
-          <button
-            onClick={() => onAction(task, 'complete')}
-            type="button"
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 text-xs font-medium rounded-lg transition active:scale-[0.97]"
-            title="Edit Logs"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-            </svg>
-            Edit Logs
-          </button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };

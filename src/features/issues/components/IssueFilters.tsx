@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface IssueFiltersProps {
-  sortBy: 'date' | 'task';
-  onChange: (sort: 'date' | 'task') => void;
+  sortBy: 'date' | 'task' | 'severity';
+  onChange: (sort: 'date' | 'task' | 'severity') => void;
 }
 
 export const IssueFilters: React.FC<IssueFiltersProps> = ({
@@ -12,6 +12,7 @@ export const IssueFilters: React.FC<IssueFiltersProps> = ({
   const modes = [
     { label: 'Latest Logged', value: 'date' as const },
     { label: 'Group by Task', value: 'task' as const },
+    { label: 'Severity Priority', value: 'severity' as const },
   ];
 
   return (

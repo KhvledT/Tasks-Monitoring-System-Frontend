@@ -33,6 +33,21 @@ export const PostponeTaskModal: React.FC<PostponeTaskModalProps> = ({
     }
   }, [task]);
 
+  // Escape key handler to close the modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onCancel]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!task) return;
@@ -109,9 +124,10 @@ export const PostponeTaskModal: React.FC<PostponeTaskModalProps> = ({
                       setValidationError(null);
                     }
                   }}
+                  disabled={isLoading}
                   placeholder="Provide a written reason (e.g. Technician onboarding postponed, weather operations constraints)..."
                   rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-655 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-200 text-xs font-medium placeholder-zinc-655 transition focus:outline-none focus:ring-2 focus:ring-sky-500/50 hover:bg-zinc-900/60 resize-none disabled:opacity-50 disabled:pointer-events-none"
                   required
                 />
               </div>

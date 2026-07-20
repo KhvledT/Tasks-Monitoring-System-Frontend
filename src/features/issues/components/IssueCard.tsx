@@ -23,12 +23,39 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelect }) => {
       const month = months[d.getMonth()];
       const year = d.getFullYear();
       
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-
-      return `${day} ${month} ${year} at ${hours}:${minutes} UTC`;
+      return `${day} ${month} ${year}`;
     } catch {
       return dateStr;
+    }
+  };
+
+  const getSeverityBadgeClass = (sev: string) => {
+    switch (sev) {
+      case 'CRITICAL':
+        return 'bg-red-500 text-white border-red-600';
+      case 'MAJOR':
+        return 'bg-orange-500 text-white border-orange-600';
+      case 'MINOR':
+        return 'bg-blue-500 text-white border-blue-600';
+      case 'OBSERVATION':
+        return 'bg-zinc-500 text-white border-zinc-600';
+      default:
+        return 'bg-zinc-500 text-white border-zinc-600';
+    }
+  };
+
+  const getStatusBadgeClass = (st: string) => {
+    switch (st) {
+      case 'OPEN':
+        return 'bg-red-950/20 text-red-400 border-red-900/10';
+      case 'IN_PROGRESS':
+        return 'bg-amber-950/20 text-amber-400 border-amber-900/10';
+      case 'RESOLVED':
+        return 'bg-emerald-950/20 text-emerald-400 border-emerald-900/10';
+      case 'CLOSED':
+        return 'bg-zinc-900/50 text-zinc-400 border-zinc-800';
+      default:
+        return 'bg-zinc-900/50 text-zinc-400 border-zinc-800';
     }
   };
 
@@ -44,11 +71,18 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelect }) => {
       <Card className="border border-zinc-900 bg-zinc-950/40 hover:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between h-full gap-4 transition duration-200 shadow-md group">
         <div className="flex flex-col gap-2.5">
           <div className="flex items-start justify-between gap-3">
-            <span className="text-[9px] font-bold text-sky-400 uppercase tracking-wider bg-sky-950/30 px-2 py-0.5 rounded border border-sky-900/30 truncate max-w-[180px]">
-              {issue.taskTitle}
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {issue.severity && (
+                <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border shrink-0 ${getSeverityBadgeClass(issue.severity)}`}>
+                  {issue.severity}
+                </span>
+              )}
+              <span className="text-[9px] font-bold text-zinc-500 font-mono">
+                DEF-{String(issue.id).slice(-4)}
+              </span>
+            </div>
             <span className="text-[10px] text-zinc-550 font-mono shrink-0">
-              {getFormattedDateString(issue.issueDate).split(' at ')[0]}
+              {getFormattedDateString(issue.issueDate)}
             </span>
           </div>
 
@@ -63,23 +97,37 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelect }) => {
           )}
         </div>
 
-        <div className="flex items-center justify-between border-t border-zinc-900/50 pt-3.5 mt-auto">
-          {issue.imageUrl ? (
-            <div className="flex items-center gap-1.5 text-[10px] text-sky-400 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1.75 0Z" />
-              </svg>
-              <span>Photo Attached</span>
+        <div className="flex flex-col gap-3 mt-auto">
+          {(issue.status || 'OPEN').toUpperCase() === 'IN_PROGRESS' && (
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-[9px] text-zinc-500">
+                <span>Progress</span>
+                <span>65%</span>
+              </div>
+              <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-full" style={{ width: '65%' }} />
+              </div>
             </div>
-          ) : (
-            <span className="text-[10px] text-zinc-600 font-medium">No Attachment</span>
           )}
 
-          <div className="text-[10px] text-zinc-400 group-hover:text-sky-400 font-bold transition flex items-center gap-1">
-            View Details
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
+          <div className="flex items-center justify-between border-t border-zinc-900/50 pt-3.5">
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2">
+                <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-zinc-950 flex items-center justify-center text-[8px] text-white font-bold">
+                  CE
+                </div>
+                <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-zinc-950 flex items-center justify-center text-[8px] text-white font-bold">
+                  ET
+                </div>
+              </div>
+            </div>
+
+            <div className="text-[10px] text-zinc-400 group-hover:text-sky-400 font-bold transition flex items-center gap-1">
+              Details
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </div>
           </div>
         </div>
       </Card>

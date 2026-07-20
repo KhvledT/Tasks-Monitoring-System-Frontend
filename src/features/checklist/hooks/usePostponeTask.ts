@@ -10,8 +10,9 @@ export const usePostponeTask = () => {
     mutationFn: ({ recordId, data }: { recordId: string; data: PostponeTaskRequest }) =>
       checklistApi.postponeTask(recordId, data),
     onSuccess: () => {
-      // Invalidate all checklist records queries to reload state
+      // Invalidate all checklist records and dashboard metrics to reload state
       queryClient.invalidateQueries({ queryKey: CHECKLIST_KEYS.all() });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };

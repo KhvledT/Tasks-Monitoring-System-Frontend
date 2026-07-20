@@ -10,9 +10,14 @@ import { ChecklistEmptyState } from '../components/ChecklistEmptyState';
 import { ChecklistSkeleton } from '../components/ChecklistSkeleton';
 import { CompleteTaskModal } from '../components/CompleteTaskModal';
 import { PostponeTaskModal } from '../components/PostponeTaskModal';
+import { useActiveVessel } from '../../../shared/hooks/useActiveVessel';
+import { useActiveWatch } from '../../watchSession/hooks/useWatchSession';
 import type { ChecklistTask } from '../types/checklist.types';
 
 export const ChecklistsPage: React.FC = () => {
+  const { activeVesselId, isArchiveMode } = useActiveVessel();
+  const { data: activeWatch } = useActiveWatch(activeVesselId || undefined);
+
   const {
     categories,
     isLoading,
@@ -87,6 +92,66 @@ export const ChecklistsPage: React.FC = () => {
         onDateChange={setSelectedDate}
       />
 
+      {activeVesselId && activeWatch === null && (
+        <div className="p-5 bg-amber-955/20 border border-amber-900/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start sm:items-center gap-3 text-amber-400 font-bold text-xs leading-relaxed">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 shrink-0 mt-0.5 sm:mt-0">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.13 2.014 21 3.752 21h16.496c1.738 0 1.922-1.87 1.054-3.376C20.43 16.12 18.232 12.33 16.1 8.65c-.87-1.503-2.607-1.503-3.477 0L3.303 17.626ZM12 17.25h.007v.007H12v-.007Z" />
+            </svg>
+            <div>
+              <p className="font-extrabold text-[13px] text-amber-300">Watch Session Offline</p>
+              <p className="text-zinc-400 font-medium text-[11px] mt-0.5">There is no active watchkeeping shift started for this vessel. You must start a watch session before completing deck walks.</p>
+            </div>
+          </div>
+          <a
+            href="/dashboard?startWatch=true"
+            className="px-4.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl transition shadow-lg active:scale-95 text-center shrink-0"
+          >
+            Start Watch Session
+          </a>
+        </div>
+      )}
+
+      {/* Checklist Statistics Bar */}
+      {categories.length > 0 && (() => {
+        const allTasks = categories.flatMap(cat => cat.tasks);
+        const total = allTasks.length;
+        const completed = allTasks.filter(t => String(t.status).toLowerCase() === 'completed' || String(t.status) === '1').length;
+        const postponed = allTasks.filter(t => String(t.status).toLowerCase() === 'postponed' || String(t.status) === '2').length;
+        const remaining = total - completed - postponed;
+        const compliance = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const issuesCount = allTasks.filter(t => t.hasIssue).length;
+
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-zinc-950/20 border border-zinc-900 rounded-2xl p-4 shadow-lg">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Total Checks</span>
+              <span className="text-lg font-bold text-zinc-200">{total}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Completed</span>
+              <span className="text-lg font-bold text-emerald-400">{completed}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Remaining</span>
+              <span className="text-lg font-bold text-sky-400">{remaining}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Postponed</span>
+              <span className="text-lg font-bold text-amber-400">{postponed}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Issues Raised</span>
+              <span className="text-lg font-bold text-red-400">{issuesCount}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Completion Rate</span>
+              <span className="text-lg font-bold text-sky-400">{compliance}%</span>
+            </div>
+          </div>
+        );
+      })()}
+
       {error ? (
         /* Error Alert State */
         <div className="p-5 bg-red-950/20 border border-red-900/40 rounded-2xl flex flex-col gap-2.5 shadow-xl">
@@ -123,6 +188,7 @@ export const ChecklistsPage: React.FC = () => {
                   key={group.category.id}
                   group={group}
                   onTaskAction={handleTaskAction}
+                  isArchiveMode={isArchiveMode}
                 />
               ))}
             </div>

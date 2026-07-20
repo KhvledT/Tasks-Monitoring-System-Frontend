@@ -1,7 +1,16 @@
 import React, { createContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import { apiClient } from '../lib/axios';
-import { clearRefreshToken, setRefreshToken, getRefreshToken } from '../lib/token';
+import { clearRefreshToken, setRefreshToken, getRefreshToken, getAccessToken, isTokenExpired } from '../lib/token';
 import { setMemoryToken, registerLogoutHandler } from '../lib/interceptors';
+import { ENV } from '../env';
+
+export interface UserSettings {
+  dailyRenewalTime?: string;
+  weeklyRenewalDay?: number;
+  monthlyRenewalDay?: number;
+  notificationsEnabled?: boolean;
+}
 
 export interface User {
   id: string;
@@ -12,6 +21,10 @@ export interface User {
   signOnDate?: string;
   isActive: boolean;
   isVerified: boolean;
+  settings?: UserSettings;
+  avatarUrl?: string;
+  phone?: string;
+  company?: string;
 }
 
 export interface AuthContextType {
@@ -59,24 +72,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialize and check user session on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = getRefreshToken();
-      if (!token) {
+      const refreshToken = getRefreshToken();
+      const accessToken = getAccessToken();
+
+      if (!refreshToken) {
         setIsCheckingAuth(false);
         return;
       }
 
+      // Check if access token exists and is valid
+      const isExpired = isTokenExpired(accessToken);
+
+      if (isExpired) {
+        // If expired or missing but we have a refresh token, let's refresh FIRST
+        try {
+          const response = await axios.post(`${ENV.apiUrl}/auth/refresh`, {
+            refreshToken,
+          });
+          const newAccessToken = response.data?.result?.access_Token;
+          if (newAccessToken) {
+            setMemoryToken(newAccessToken);
+          } else {
+            throw new Error('Refresh response missing token');
+          }
+        } catch (refreshErr) {
+          console.error('Failed to auto-refresh token on initialize:', refreshErr);
+          logout();
+          setIsCheckingAuth(false);
+          return;
+        }
+      }
+
+      // Now we are guaranteed to have a valid access token
       try {
-        // Fetch current profile. If memory token is empty, Axios interceptor 
-        // will automatically refresh it and replay this request.
         const response = await apiClient.get('/auth/me');
         const profile = response.data.result;
         
         setUser(profile);
         setIsAuthenticated(true);
       } catch (error) {
-        // If profile fetch fails (e.g. token expired and refresh failed), 
-        // Axios interceptor will have already logged us out.
-        console.error('Failed to restore session:', error);
+        console.error('Failed to retrieve profile:', error);
+        logout();
       } finally {
         setIsCheckingAuth(false);
       }

@@ -33,7 +33,7 @@ export const useInitializeVessel = () => {
 
       // Perform redirection based on active vessel context
       if (active) {
-        if (location.pathname === ROUTES.SELECT_VESSEL || location.pathname === '/') {
+        if (location.pathname === '/') {
           navigate(ROUTES.DASHBOARD, { replace: true });
         }
       } else {

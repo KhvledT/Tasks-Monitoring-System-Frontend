@@ -5,7 +5,6 @@ import { useHistorySearch } from './useHistorySearch';
 import { useHistoryDateRange } from './useHistoryDateRange';
 import { useHistoryPagination } from './useHistoryPagination';
 import { useHistoryList } from './useHistoryList';
-import { historyFilterService } from '../services/history-filter.service';
 import { historySortService } from '../services/history-sort.service';
 import type { HistoryItem } from '../types/history.types';
 
@@ -39,7 +38,7 @@ export const useHistory = (): UseHistoryResult => {
   const { activeVessel, activeVesselId } = useActiveVessel();
   
   const { selectedGroup, setSelectedGroup, selectedStatus, setSelectedStatus } = useHistoryFilters();
-  const { searchQuery, setSearchQuery } = useHistorySearch();
+  const { searchQuery, debouncedQuery, setSearchQuery } = useHistorySearch();
   const { startDate, setStartDate, endDate, setEndDate } = useHistoryDateRange();
   const { page, setPage, pageSize, nextPage, prevPage, reset: resetPage } = useHistoryPagination(20);
 
@@ -48,7 +47,7 @@ export const useHistory = (): UseHistoryResult => {
   // 1. Reset pagination page count to 1 when filters or date ranges change
   useEffect(() => {
     resetPage();
-  }, [selectedGroup, selectedStatus, searchQuery, startDate, endDate, resetPage]);
+  }, [selectedGroup, selectedStatus, debouncedQuery, startDate, endDate, resetPage]);
 
   // 2. Fetch records query
   const {
@@ -61,6 +60,9 @@ export const useHistory = (): UseHistoryResult => {
     pageSize,
     startDate || undefined,
     endDate || undefined,
+    debouncedQuery || undefined,
+    selectedGroup,
+    selectedStatus,
     !!vesselId
   );
 
@@ -72,11 +74,8 @@ export const useHistory = (): UseHistoryResult => {
 
   const rawItems = data?.items || [];
 
-  // 3. Apply client-side filters
-  let processed = historyFilterService.filterHistory(rawItems, searchQuery, selectedStatus, selectedGroup);
-
-  // 4. Apply client-side sorting
-  processed = historySortService.sortHistoryByDate(processed);
+  // 4. Apply client-side sorting as fallback
+  const processed = historySortService.sortHistoryByDate(rawItems);
 
   const isEmpty = !isLoading && !error && processed.length === 0;
 

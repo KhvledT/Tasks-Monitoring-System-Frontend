@@ -1,17 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 @import "@heroui/styles";
 
 @import "./animations.css";
 
-:root {
-  --font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Global Accent Mapping */
+  --color-primary: #0055d4;
+  --color-primary-dim: #003fa3;
+  --color-surface-white: #ffffff;
+  --color-border-subtle: #e5e7eb;
+  --color-bg-light: #f8f9fa;
+  --color-text-dark: #111827;
+  --color-text-muted: #4b5563;
+
+  /* Redefining Zinc Color Palette (Dark Theme to Light Theme mapping) */
+  --color-zinc-950: #ffffff; /* Card/Container base background */
+  --color-zinc-900: #e5e7eb; /* Subtle borders */
+  --color-zinc-800: #f3f4f5; /* Medium hover states / dark backgrounds */
+  --color-zinc-700: #e5e7eb; /* Muted borders */
+  --color-zinc-600: #374151; /* Dark gray */
+  --color-zinc-500: #6b7280; /* Muted text */
+  --color-zinc-400: #4b5563; /* Secondary text */
+  --color-zinc-300: #1f2937; /* Medium-dark text */
+  --color-zinc-200: #111827; /* Primary bold text */
+  --color-zinc-100: #111827; /* Primary main text */
+  --color-zinc-50: #f8f9fa;  /* Light background fill */
+
+  /* Redefining Sky/Active Color Palette */
+  --color-sky-950: #d0e1fb;  /* Active link / container background tint */
+  --color-sky-500: #0055d4;  /* Primary Action Blue */
+  --color-sky-400: #0055d4;  /* Accent text */
+  --color-sky-300: #003fa3;  
+
+  /* Redefining warning alert spaces */
+  --color-amber-250: #f59e0b;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #09090b;
-  color: #f4f4f5;
+  background-color: #f8f9fa;
+  color: #111827;
   min-height: 100vh;
+}
+
+/* Scrollbar styling for high-density light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

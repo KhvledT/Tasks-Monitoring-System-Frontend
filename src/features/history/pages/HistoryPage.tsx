@@ -1,13 +1,11 @@
 import React from 'react';
 import { useHistory } from '../hooks/useHistory';
-import { useExportPdf } from '../hooks/useExportPdf';
-import { useExportExcel } from '../hooks/useExportExcel';
 import { useHistorySelection } from '../hooks/useHistorySelection';
 import { HistoryHeader } from '../components/HistoryHeader';
 import { HistoryFilters } from '../components/HistoryFilters';
 import { HistorySearch } from '../components/HistorySearch';
 import { HistoryDateRange } from '../components/HistoryDateRange';
-import { HistoryTable } from '../components/HistoryTable';
+import { HistoryTimeline } from '../components/HistoryTimeline';
 import { HistoryDetailsDrawer } from '../components/HistoryDetailsDrawer';
 import { HistoryEmptyState } from '../components/HistoryEmptyState';
 import { HistorySkeleton } from '../components/HistorySkeleton';
@@ -18,8 +16,6 @@ export const HistoryPage: React.FC = () => {
     isLoading,
     error,
     isEmpty,
-    activeVesselName,
-    activeVesselId,
     selectedGroup,
     setSelectedGroup,
     selectedStatus,
@@ -35,45 +31,17 @@ export const HistoryPage: React.FC = () => {
     totalPages,
   } = useHistory();
 
-  // Export Hooks
-  const { exportPdf, isExporting: isExportingPdf, error: pdfError } = useExportPdf();
-  const { exportExcel, isExporting: isExportingExcel, error: excelError } = useExportExcel();
-
   // Drawer Selection Hook
   const { selectedHistoryItem, isOpen: isDrawerOpen, open: openDrawer, close: closeDrawer } = useHistorySelection();
-
-  const handleExportPdf = () => {
-    if (!activeVesselId) return;
-    exportPdf(activeVesselId, startDate || undefined, endDate || undefined);
-  };
-
-  const handleExportExcel = () => {
-    if (!activeVesselId) return;
-    exportExcel(activeVesselId, startDate || undefined, endDate || undefined);
-  };
 
   if (isLoading) {
     return <HistorySkeleton />;
   }
 
-  const exportError = pdfError || excelError;
-
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in pb-10">
-      {/* 1. Page Header with exports trigger callbacks */}
-      <HistoryHeader
-        vesselName={activeVesselName}
-        isExportingPdf={isExportingPdf}
-        isExportingExcel={isExportingExcel}
-        onExportPdf={handleExportPdf}
-        onExportExcel={handleExportExcel}
-      />
-
-      {exportError && (
-        <div className="p-3 bg-red-955/20 border border-red-900/40 text-red-400 text-xs font-semibold rounded-xl">
-          Export Failure: {exportError}
-        </div>
-      )}
+      {/* 1. Page Header */}
+      <HistoryHeader />
 
       {error ? (
         /* Error Alert State */
@@ -118,7 +86,7 @@ export const HistoryPage: React.FC = () => {
             <HistoryEmptyState />
           ) : (
             /* 3. Table grid layout */
-            <HistoryTable
+            <HistoryTimeline
               items={items}
               onSelect={openDrawer}
               page={page}
@@ -135,6 +103,17 @@ export const HistoryPage: React.FC = () => {
         item={selectedHistoryItem}
         onClose={closeDrawer}
       />
+
+      {/* Floating Action Button */}
+      <button
+        type="button"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-[#003fa3] text-white rounded-full shadow-lg flex items-center justify-center transition active:scale-[0.95] cursor-pointer z-50"
+        title="Add new log entry"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </button>
     </div>
   );
 };

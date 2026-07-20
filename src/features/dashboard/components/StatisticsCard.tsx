@@ -21,27 +21,31 @@ export const StatisticsCard: React.FC<StatisticsCardProps> = ({
     switch (badgeColor) {
       case 'red':
         return {
-          cardBorder: 'hover:border-red-900/60',
-          badgeBg: 'bg-red-950/20 text-red-400 border-red-900/50 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
+          cardBorder: 'hover:border-red-300',
+          badgeBg: 'bg-red-50 text-red-600 border-red-200',
           pulseColor: 'bg-red-500',
+          iconBg: 'bg-red-100 text-red-600',
         };
       case 'amber':
         return {
-          cardBorder: 'hover:border-amber-900/60',
-          badgeBg: 'bg-amber-950/20 text-amber-400 border-amber-900/50 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
+          cardBorder: 'hover:border-amber-300',
+          badgeBg: 'bg-amber-50 text-amber-600 border-amber-200',
           pulseColor: 'bg-amber-500',
+          iconBg: 'bg-amber-100 text-amber-600',
         };
       case 'blue':
         return {
-          cardBorder: 'hover:border-sky-900/60',
-          badgeBg: 'bg-sky-950/20 text-sky-400 border-sky-900/50 shadow-[0_0_10px_rgba(14,165,233,0.1)]',
-          pulseColor: 'bg-sky-500',
+          cardBorder: 'hover:border-blue-300',
+          badgeBg: 'bg-blue-50 text-primary border-blue-200',
+          pulseColor: 'bg-primary',
+          iconBg: 'bg-blue-100 text-primary',
         };
       default:
         return {
-          cardBorder: 'hover:border-zinc-800',
-          badgeBg: 'bg-zinc-900/50 text-zinc-350 border-zinc-800',
+          cardBorder: 'hover:border-zinc-300',
+          badgeBg: 'bg-zinc-50 text-zinc-600 border-zinc-200',
           pulseColor: 'bg-zinc-400',
+          iconBg: 'bg-zinc-100 text-zinc-600',
         };
     }
   };
@@ -49,7 +53,7 @@ export const StatisticsCard: React.FC<StatisticsCardProps> = ({
   const styles = getBadgeStyle();
 
   const CardWrapper = ({ children }: { children: React.ReactNode }) => {
-    const classStr = `border border-zinc-900 bg-zinc-950/40 p-6 flex flex-col justify-between h-40 backdrop-blur-md transition-all duration-350 ${styles.cardBorder}`;
+    const classStr = `border border-zinc-200 bg-white p-6 flex flex-col justify-between h-40 shadow-sm transition-all duration-350 ${styles.cardBorder} hover:shadow-md`;
     if (linkTo) {
       return (
         <Link to={linkTo} className="block group">
@@ -65,7 +69,7 @@ export const StatisticsCard: React.FC<StatisticsCardProps> = ({
   return (
     <CardWrapper>
       <div className="flex items-start justify-between">
-        <span className="text-[10px] text-zinc-550 uppercase tracking-widest font-bold block mb-1">
+        <span className="text-[9px] text-zinc-400 uppercase tracking-widest font-bold block mb-1">
           {title}
         </span>
         <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-xs font-semibold ${styles.badgeBg}`}>
@@ -74,10 +78,10 @@ export const StatisticsCard: React.FC<StatisticsCardProps> = ({
         </div>
       </div>
       <div>
-        <h3 className="text-3xl font-black text-zinc-150 tracking-tight leading-none mb-2">
+        <h3 className="text-3xl font-black text-black tracking-tight leading-none mb-2">
           {count}
         </h3>
-        <p className="text-xs text-zinc-400 font-medium leading-normal">
+        <p className="text-xs text-zinc-500 font-medium leading-normal">
           {description}
         </p>
       </div>

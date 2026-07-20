@@ -4,6 +4,12 @@ export interface DashboardMetrics {
   pendingCount: number;
   postponedCount: number;
   activeIssues: number;
+  activeWatchSession?: {
+    id: string;
+    status: 'STARTED' | 'ACTIVE' | 'PAUSED' | 'HANDED_OVER' | 'COMPLETED';
+    startedAt: string;
+    notes: string | null;
+  } | null;
 }
 
 export interface RecentActivityItem {

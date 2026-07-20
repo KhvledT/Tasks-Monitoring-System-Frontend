@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface ChecklistCategoryProps {
   group: ChecklistCategoryGroup;
   onTaskAction: (task: ChecklistTask, action: 'complete' | 'postpone') => void;
+  isArchiveMode?: boolean;
 }
 
 export const ChecklistCategory: React.FC<ChecklistCategoryProps> = ({
   group,
   onTaskAction,
+  isArchiveMode,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { category, tasks } = group;
@@ -33,7 +35,7 @@ export const ChecklistCategory: React.FC<ChecklistCategoryProps> = ({
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-md border tracking-wide uppercase ${
               isCompleted
-                ? 'bg-emerald-950/20 text-emerald-400 border-emerald-900/40'
+                ? 'bg-emerald-955/20 text-emerald-400 border-emerald-900/40'
                 : 'bg-zinc-900/60 text-zinc-450 border-zinc-800'
             }`}
           >
@@ -67,7 +69,7 @@ export const ChecklistCategory: React.FC<ChecklistCategoryProps> = ({
           >
             <div className="p-6 flex flex-col gap-4">
               {tasks.map((task) => (
-                <TaskCard key={task.id} task={task} onAction={onTaskAction} />
+                <TaskCard key={task.id} task={task} onAction={onTaskAction} isArchiveMode={isArchiveMode} />
               ))}
             </div>
           </motion.div>

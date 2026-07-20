@@ -6,11 +6,14 @@ export const useExportPdf = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const exportPdf = async (vesselId: string, startDate?: string, endDate?: string) => {
+  const exportPdf = async (
+    vesselId: string,
+    config: any
+  ) => {
     setIsExporting(true);
     setError(null);
     try {
-      const blob = await historyApi.exportPdf(vesselId, startDate, endDate);
+      const blob = await historyApi.exportPdf(vesselId, config);
       const filename = `vessel-logbook-${vesselId}-${new Date().toISOString().split('T')[0]}.pdf`;
       downloadBlob(blob, filename);
     } catch (err: any) {

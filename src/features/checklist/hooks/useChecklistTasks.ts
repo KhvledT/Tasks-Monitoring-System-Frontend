@@ -40,6 +40,7 @@ export const useChecklistTasks = (vesselId: string, date: string, enabled = true
                     notes: taskItem.notes,
                     measurement: taskItem.measurement,
                     postponedReason: taskItem.reason || taskItem.postponedReason,
+                    hasIssue: !!taskItem.hasIssue,
                   };
                 }),
               };
@@ -48,12 +49,12 @@ export const useChecklistTasks = (vesselId: string, date: string, enabled = true
             // Flat task record array
             const groupsMap = new Map<string, ChecklistTask[]>();
             const categoryMetaMap = new Map<string, any>();
-
+ 
             rawResult.forEach((taskItem: any) => {
               const snapshot = taskItem.task_definition_snapshot || {};
               const categoryName = snapshot.categoryName || taskItem.categoryName || 'General';
               const categoryId = snapshot.categoryId || taskItem.categoryId || 'general';
-
+ 
               const task: ChecklistTask = {
                 id: taskItem._id || taskItem.id || String(Math.random()),
                 title: snapshot.title || taskItem.title || 'Unknown Task',
@@ -65,6 +66,7 @@ export const useChecklistTasks = (vesselId: string, date: string, enabled = true
                 notes: taskItem.notes,
                 measurement: taskItem.measurement,
                 postponedReason: taskItem.reason || taskItem.postponedReason,
+                hasIssue: !!taskItem.hasIssue,
               };
 
               if (!groupsMap.has(categoryName)) {

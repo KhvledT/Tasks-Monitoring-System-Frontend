@@ -8,6 +8,7 @@ const issueFormSchema = z.object({
   description: z.string().min(5, 'Description must be at least 5 characters long.'),
   note: z.string().optional(),
   imageUrl: z.union([z.string().url('Invalid image URL format.'), z.string().length(0)]).optional(),
+  severity: z.enum(['CRITICAL', 'MAJOR', 'MINOR', 'OBSERVATION']),
 });
 
 export type IssueFormValues = z.infer<typeof issueFormSchema>;
@@ -24,6 +25,7 @@ export const useIssueForm = ({ onSubmit }: UseIssueFormProps) => {
       description: '',
       note: '',
       imageUrl: '',
+      severity: 'MINOR',
     },
   });
 
@@ -34,6 +36,7 @@ export const useIssueForm = ({ onSubmit }: UseIssueFormProps) => {
       note: values.note || undefined,
       imageUrl: values.imageUrl || undefined,
       issueDate: new Date().toISOString(),
+      severity: values.severity,
     };
     await onSubmit(payload);
   };
@@ -44,6 +47,7 @@ export const useIssueForm = ({ onSubmit }: UseIssueFormProps) => {
       description: '',
       note: '',
       imageUrl: '',
+      severity: 'MINOR',
     });
   };
 

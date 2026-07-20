@@ -6,11 +6,14 @@ export const useExportExcel = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const exportExcel = async (vesselId: string, startDate?: string, endDate?: string) => {
+  const exportExcel = async (
+    vesselId: string,
+    config: any
+  ) => {
     setIsExporting(true);
     setError(null);
     try {
-      const blob = await historyApi.exportExcel(vesselId, startDate, endDate);
+      const blob = await historyApi.exportExcel(vesselId, config);
       const filename = `vessel-logbook-${vesselId}-${new Date().toISOString().split('T')[0]}.xlsx`;
       downloadBlob(blob, filename);
     } catch (err: any) {

@@ -7,9 +7,12 @@ export interface Profile {
   role: ProfileRole;
   rank: string;
   isActive: boolean;
+  signOnDate?: string;
+  avatarUrl?: string;
+  phone?: string;
+  company?: string;
 }
 
-/** Documented backend preference shape; none are documented yet. */
 export interface UserSetting {
   key: string;
   label: string;
@@ -24,4 +27,8 @@ export type ProfileUserSource = {
   role?: string;
   rank?: string;
   isActive?: boolean;
+  signOnDate?: string;
+  avatarUrl?: string;
+  phone?: string;
+  company?: string;
 };

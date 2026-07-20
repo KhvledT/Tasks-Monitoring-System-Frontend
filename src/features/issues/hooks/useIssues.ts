@@ -13,8 +13,8 @@ export interface UseIssuesResult {
   isEmpty: boolean;
   activeVesselName: string;
   activeVesselId: string;
-  sortBy: 'date' | 'task';
-  setSortBy: (sort: 'date' | 'task') => void;
+  sortBy: 'date' | 'task' | 'severity';
+  setSortBy: (sort: 'date' | 'task' | 'severity') => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 }
@@ -44,6 +44,18 @@ export const useIssues = (): UseIssuesResult => {
   // Sort issues
   if (sortBy === 'date') {
     processed = issueSortService.sortIssuesByDate(processed);
+  } else if (sortBy === 'severity') {
+    const severityScore: Record<string, number> = {
+      CRITICAL: 1,
+      MAJOR: 2,
+      MINOR: 3,
+      OBSERVATION: 4,
+    };
+    processed = [...processed].sort((a, b) => {
+      const scoreA = severityScore[a.severity || 'MINOR'] || 3;
+      const scoreB = severityScore[b.severity || 'MINOR'] || 3;
+      return scoreA - scoreB;
+    });
   } else {
     // Sort alphabetically by linked task name
     processed = [...processed].sort((a, b) => (a.taskTitle || '').localeCompare(b.taskTitle || ''));

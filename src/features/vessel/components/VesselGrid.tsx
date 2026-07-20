@@ -7,16 +7,24 @@ interface VesselGridProps {
   vessels: Vessel[] | undefined;
   isLoading: boolean;
   isActivatingId: string | null;
+  isDeletingId: string | null;
   onActivate: (id: string) => void;
+  onViewArchive: (vessel: Vessel) => void;
   onRegisterClick: () => void;
+  onEdit: (vessel: Vessel) => void;
+  onDelete: (id: string, isActive: boolean) => void;
 }
 
 export const VesselGrid: React.FC<VesselGridProps> = ({
   vessels,
   isLoading,
   isActivatingId,
+  isDeletingId,
   onActivate,
+  onViewArchive,
   onRegisterClick,
+  onEdit,
+  onDelete,
 }) => {
   if (isLoading) {
     return (
@@ -38,6 +46,8 @@ export const VesselGrid: React.FC<VesselGridProps> = ({
     return <EmptyVesselState onRegisterClick={onRegisterClick} />;
   }
 
+  const anyActionPending = !!isActivatingId || !!isDeletingId;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {vessels.map((vessel) => {
@@ -47,7 +57,12 @@ export const VesselGrid: React.FC<VesselGridProps> = ({
             key={id}
             vessel={vessel}
             isActivating={isActivatingId === id}
+            isDeleting={isDeletingId === id}
+            anyActionPending={anyActionPending}
             onActivate={onActivate}
+            onViewArchive={onViewArchive}
+            onEdit={onEdit}
+            onDelete={onDelete}
           />
         );
       })}

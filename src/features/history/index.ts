@@ -1,4 +1,3 @@
-export * from './pages/HistoryPage';
 export * from './hooks/useHistory';
 export * from './hooks/useHistoryList';
 export * from './hooks/useHistoryPagination';

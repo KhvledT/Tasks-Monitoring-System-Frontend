@@ -32,4 +32,9 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: ROUTES.PROFILE,
     icon: 'Profile',
   },
+  {
+    label: 'Reports & Exports',
+    path: ROUTES.REPORTS,
+    icon: 'Reports',
+  },
 ];

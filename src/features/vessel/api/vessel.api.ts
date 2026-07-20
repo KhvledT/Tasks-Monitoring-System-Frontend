@@ -31,5 +31,15 @@ export const vesselApi = {
     const response = await apiClient.patch<ActivateVesselResponse>(`/vessel/${vesselId}/set-active`);
     return response.data;
   },
+
+  updateVessel: async (vesselId: string, data: Partial<CreateVesselRequest>): Promise<any> => {
+    const response = await apiClient.patch(`/vessel/${vesselId}/update`, data);
+    return response.data;
+  },
+
+  deleteVessel: async (vesselId: string): Promise<any> => {
+    const response = await apiClient.delete(`/vessel/${vesselId}/delete`);
+    return response.data;
+  },
 };
 export default vesselApi;

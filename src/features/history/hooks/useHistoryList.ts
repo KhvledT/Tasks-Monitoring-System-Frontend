@@ -10,12 +10,33 @@ export const useHistoryList = (
   limit: number,
   startDate?: string,
   endDate?: string,
+  search?: string,
+  taskGroup?: string,
+  status?: string,
   enabled = true
 ) => {
+  // Translate UI dropdown values to backend schemas
+  const mappedGroup = taskGroup === 'all' ? undefined : taskGroup;
+  let mappedStatus: number | undefined = undefined;
+  if (status === 'Completed') mappedStatus = 1;
+  if (status === 'Postponed') mappedStatus = 2;
+
+  const filters = { startDate, endDate, search, taskGroup: mappedGroup, status: mappedStatus };
+
   return useQuery<HistoryPagination>({
-    queryKey: HISTORY_KEYS.list(vesselId, { startDate, endDate }, page),
-    queryFn: async () => {
-      const response = await historyApi.getHistoryRecords(vesselId, page, limit, startDate, endDate);
+    queryKey: HISTORY_KEYS.list(vesselId, filters, page),
+    queryFn: async ({ signal }) => {
+      const response = await historyApi.getHistoryRecords(
+        vesselId,
+        page,
+        limit,
+        startDate,
+        endDate,
+        search || undefined,
+        mappedGroup,
+        mappedStatus,
+        signal
+      );
       const normalized = historyMapperService.mapToPaginatedHistory(response);
       return normalized;
     },

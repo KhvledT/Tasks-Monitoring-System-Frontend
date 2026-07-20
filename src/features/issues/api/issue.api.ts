@@ -6,14 +6,31 @@ import type {
 
 export const issueApi = {
   getIssues: async (vesselId: string): Promise<IssueListResponse> => {
-    const response = await apiClient.get<IssueListResponse>('/issue/list', {
+    const response = await apiClient.get<any>('/issue/list', {
       params: { vesselId },
     });
-    return response.data;
+    const data = response.data;
+    if (data?.result && typeof data.result === 'object' && Array.isArray(data.result.docs)) {
+      return {
+        ...data,
+        result: data.result.docs,
+      } as unknown as IssueListResponse;
+    }
+    return data;
   },
 
   createIssue: async (data: CreateIssueRequest): Promise<any> => {
     const response = await apiClient.post('/issue/create', data);
+    return response.data;
+  },
+
+  deleteIssue: async (issueId: string): Promise<any> => {
+    const response = await apiClient.delete(`/issue/${issueId}/delete`);
+    return response.data;
+  },
+
+  updateIssue: async (issueId: string, data: { description?: string; note?: string; severity?: string; status?: string; resolutionNotes?: string }): Promise<any> => {
+    const response = await apiClient.patch(`/issue/${issueId}/update`, data);
     return response.data;
   },
 

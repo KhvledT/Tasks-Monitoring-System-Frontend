@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router';
+import { ROUTES } from '../../../constants/routes';
 import { useVessels } from '../hooks/useVessels';
 import { useActivateVessel } from '../hooks/useActivateVessel';
 import { useActiveVessel } from '../../../shared/hooks/useActiveVessel';
@@ -66,26 +68,37 @@ export const VesselSelector: React.FC = () => {
 
       {isOpen && (
         <div className="absolute left-0 right-0 mt-2 rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl z-50 py-1.5 overflow-hidden animate-in fade-in duration-100">
-          {otherVessels.length === 0 ? (
-            <div className="px-4 py-2.5 text-xs text-zinc-500 text-center">
-              No other vessels available
-            </div>
-          ) : (
-            otherVessels.map((v) => {
-              const id = (v as any)._id || v.id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => handleSelect(id)}
-                  className="w-full text-left px-4 py-2.5 hover:bg-zinc-900/60 transition flex flex-col gap-0.5 border-b border-zinc-900/40 last:border-0"
-                >
-                  <span className="font-bold text-sm text-zinc-200">{v.name}</span>
-                  <span className="text-xs text-zinc-500">{v.type}</span>
-                </button>
-              );
-            })
-          )}
+          <div className="max-h-60 overflow-y-auto">
+            {otherVessels.length === 0 ? (
+              <div className="px-4 py-2.5 text-xs text-zinc-550 text-center">
+                No other vessels available
+              </div>
+            ) : (
+              otherVessels.map((v) => {
+                const id = (v as any)._id || v.id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => handleSelect(id)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-zinc-900/60 transition flex flex-col gap-0.5 border-b border-zinc-900/40 last:border-0"
+                  >
+                    <span className="font-bold text-sm text-zinc-200">{v.name}</span>
+                    <span className="text-xs text-zinc-500">{v.type}</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+          <div className="border-t border-zinc-900 mt-1.5 pt-1.5 px-2">
+            <Link
+              to={ROUTES.SELECT_VESSEL}
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold text-sky-400 hover:text-sky-350 bg-sky-950/20 hover:bg-sky-950/40 transition w-full text-center"
+            >
+              Manage & Register Vessels
+            </Link>
+          </div>
         </div>
       )}
     </div>

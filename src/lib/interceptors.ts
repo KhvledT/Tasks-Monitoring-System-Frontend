@@ -1,13 +1,18 @@
 import axios from 'axios';
 import { apiClient } from './axios';
-import { getRefreshToken } from './token';
+import { getRefreshToken, getAccessToken, setAccessToken, clearAccessToken } from './token';
 import { ENV } from '../env';
 
-let memoryAccessToken: string | null = null;
+let memoryAccessToken: string | null = getAccessToken();
 let logoutHandler: (() => void) | null = null;
 
 export const setMemoryToken = (token: string | null) => {
   memoryAccessToken = token;
+  if (token) {
+    setAccessToken(token);
+  } else {
+    clearAccessToken();
+  }
 };
 
 export const getMemoryToken = () => memoryAccessToken;
@@ -27,11 +32,12 @@ const handleLogout = () => {
   }
 };
 
-// Request Interceptor: Inject Authorization header
+// Request Interceptor: Inject Authorization header using latest token
 apiClient.interceptors.request.use(
   (config) => {
-    if (memoryAccessToken && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${memoryAccessToken}`;
+    const token = getMemoryToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -92,8 +98,6 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
-        // The user_api_reference documents the success response field structure:
-        // result: { access_Token: "..." }
         const newAccessToken = response.data?.result?.access_Token;
         if (!newAccessToken) {
           throw new Error('Refresh token response missing access token');

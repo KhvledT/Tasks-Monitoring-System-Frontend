@@ -1,8 +1,8 @@
-import React from 'react';
-import type { HistoryItem } from '../types/history.types';
-import { HistoryStatusBadge } from './HistoryStatusBadge';
-import { formatDateTime } from '../../../shared/utils/date';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import type { HistoryItem } from "../types/history.types";
+import { HistoryStatusBadge } from "./HistoryStatusBadge";
+import { formatDateTime } from "../../../shared/utils/date";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HistoryDetailsDrawerProps {
   isOpen: boolean;
@@ -31,25 +31,40 @@ export const HistoryDetailsDrawer: React.FC<HistoryDetailsDrawerProps> = ({
           {/* Drawer container sliding from right */}
           <div className="absolute inset-y-0 right-0 max-w-full flex pl-10 pointer-events-none">
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="w-screen max-w-md bg-zinc-950 border-l border-zinc-900 pointer-events-auto flex flex-col shadow-2xl h-full"
             >
               {/* Drawer Header */}
               <div className="px-6 py-5 border-b border-zinc-900 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-100 tracking-tight">Audit Log Details</h3>
-                  <p className="text-[11px] text-zinc-450 mt-0.5">Comprehensive audit trail logs information</p>
+                  <h3 className="text-sm font-bold text-zinc-100 tracking-tight">
+                    Audit Log Details
+                  </h3>
+                  <p className="text-[11px] text-zinc-450 mt-0.5">
+                    Comprehensive audit trail logs information
+                  </p>
                 </div>
                 <button
                   onClick={onClose}
                   className="p-1 rounded-lg text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200 transition cursor-pointer"
                   aria-label="Close drawer"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18 18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -61,9 +76,14 @@ export const HistoryDetailsDrawer: React.FC<HistoryDetailsDrawerProps> = ({
                   <span className="text-[9px] font-bold text-sky-400 uppercase tracking-wider block mb-1">
                     Linked Task Title
                   </span>
-                  <p className="text-xs font-bold text-zinc-150 leading-snug">{item.title}</p>
+                  <p className="text-xs font-bold text-zinc-150 leading-snug">
+                    {item.title}
+                  </p>
                   <span className="text-[10px] text-zinc-550 block mt-2">
-                    Category: <span className="font-semibold text-zinc-400">{item.categoryName}</span>
+                    Category:{" "}
+                    <span className="font-semibold text-zinc-400">
+                      {item.categoryName}
+                    </span>
                   </span>
                 </div>
 
@@ -95,8 +115,12 @@ export const HistoryDetailsDrawer: React.FC<HistoryDetailsDrawerProps> = ({
                       {item.completedBy.fullName.charAt(0)}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-zinc-250">{item.completedBy.fullName}</span>
-                      <span className="text-[10px] text-zinc-500 font-medium">{item.completedBy.rank}</span>
+                      <span className="text-xs font-bold text-zinc-250">
+                        {item.completedBy.fullName}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-medium">
+                        {item.completedBy.rank}
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -27,6 +27,10 @@ export const profileMapperService = {
       role: toRole(user.role),
       rank: user.rank || '',
       isActive: Boolean(user.isActive),
+      signOnDate: user.signOnDate || '',
+      avatarUrl: user.avatarUrl || '',
+      phone: user.phone || '',
+      company: user.company || '',
     };
   },
 };
