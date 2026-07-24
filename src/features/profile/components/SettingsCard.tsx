@@ -1,56 +1,90 @@
-import React from 'react';
-import { Card } from '@heroui/react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { Card } from "@heroui/react";
+import { motion } from "framer-motion";
 
 export const SettingsCard: React.FC = () => {
+  const [criticalAlerts, setCriticalAlerts] = useState(() => {
+    return localStorage.getItem("settings_critical_alerts") !== "false";
+  });
+  const [logbookUpdates, setLogbookUpdates] = useState(() => {
+    return localStorage.getItem("settings_logbook_updates") !== "false";
+  });
+
+  const toggleCriticalAlerts = () => {
+    setCriticalAlerts((prev) => {
+      const next = !prev;
+      localStorage.setItem("settings_critical_alerts", String(next));
+      return next;
+    });
+  };
+
+  const toggleLogbookUpdates = () => {
+    setLogbookUpdates((prev) => {
+      const next = !prev;
+      localStorage.setItem("settings_logbook_updates", String(next));
+      return next;
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
     >
-      <Card className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl backdrop-blur-md h-full">
+      <Card className="border border-zinc-200 bg-white p-6 rounded-2xl shadow-sm h-full">
         <div className="mb-5">
-          <h3 className="text-sm font-bold text-zinc-200 tracking-tight mb-1">Application Settings</h3>
+          <h3 className="text-sm font-bold text-gray-900 tracking-tight mb-1">
+            Application Settings
+          </h3>
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between py-3 border-b border-zinc-900/50">
+          <div className="flex items-center justify-between py-3 border-b border-zinc-100">
             <div>
-              <span className="text-xs font-bold text-zinc-200">Critical Operational Alerts</span>
-              <p className="text-[10px] text-zinc-500 mt-0.5">Receive notifications for urgent system alerts</p>
+              <span className="text-xs font-bold text-gray-800">
+                Critical Operational Alerts
+              </span>
+              <p className="text-[10px] text-zinc-500 mt-0.5">
+                Receive notifications for urgent system alerts
+              </p>
             </div>
             <button
               type="button"
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-primary"
+              onClick={toggleCriticalAlerts}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer ${
+                criticalAlerts ? "bg-primary" : "bg-zinc-200"
+              }`}
             >
-              <span className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-6" />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between py-3 border-b border-zinc-900/50">
-            <div>
-              <span className="text-xs font-bold text-zinc-200">Logbook Updates</span>
-              <p className="text-[10px] text-zinc-500 mt-0.5">Get notified when new log entries are recorded</p>
-            </div>
-            <button
-              type="button"
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-primary"
-            >
-              <span className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-6" />
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out ${
+                  criticalAlerts ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
             </button>
           </div>
 
           <div className="flex items-center justify-between py-3">
             <div>
-              <span className="text-xs font-bold text-zinc-200">Appearance Mode</span>
-              <p className="text-[10px] text-zinc-500 mt-0.5">Current: Light Mode (Day Monitoring)</p>
+              <span className="text-xs font-bold text-gray-800">
+                Logbook Updates
+              </span>
+              <p className="text-[10px] text-zinc-500 mt-0.5">
+                Get notified when new log entries are recorded
+              </p>
             </div>
             <button
               type="button"
-              className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg transition cursor-pointer"
+              onClick={toggleLogbookUpdates}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 cursor-pointer ${
+                logbookUpdates ? "bg-primary" : "bg-zinc-200"
+              }`}
             >
-              Switch Theme
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out ${
+                  logbookUpdates ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
             </button>
           </div>
         </div>

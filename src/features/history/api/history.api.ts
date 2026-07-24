@@ -45,6 +45,19 @@ export const historyApi = {
     });
     return response.data;
   },
+
+  exportWord: async (
+    vesselId: string,
+    config: any
+  ): Promise<Blob> => {
+    const response = await apiClient.post('/export/word', {
+      vesselId,
+      ...config
+    }, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
 export default historyApi;

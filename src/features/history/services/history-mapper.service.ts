@@ -2,13 +2,24 @@ import type { HistoryItem, HistoryPagination } from '../types/history.types';
 
 export const historyMapperService = {
   mapToHistoryItem: (raw: any): HistoryItem => {
-    const snapshot = raw.task_definition_snapshot || raw.taskRecord?.task_definition_snapshot || {};
+    const snapshot = raw.task_definition_snapshot || raw.taskSnapshot || raw.taskRecord?.task_definition_snapshot || {};
+    
+    let statusStr = "Completed";
+    const s = raw.status !== undefined && raw.status !== null ? raw.status : snapshot.status;
+    if (s === 1 || String(s).toLowerCase() === "completed") {
+      statusStr = "Completed";
+    } else if (s === 2 || String(s).toLowerCase() === "postponed") {
+      statusStr = "Postponed";
+    } else if (s === 0 || String(s).toLowerCase() === "uncompleted" || String(s).toLowerCase() === "pending") {
+      statusStr = "Uncompleted";
+    }
+
     return {
       id: raw._id || raw.id || String(Math.random()),
-      taskRecordId: raw.taskRecordId || raw.task_record_id || '',
+      taskRecordId: raw.taskRecordId || raw.task_record_id || raw._id || '',
       title: snapshot.title || raw.title || raw.taskRecord?.task_definition_snapshot?.title || 'Vessel Log Entry',
       categoryName: snapshot.categoryName || raw.categoryName || raw.taskRecord?.task_definition_snapshot?.categoryName || 'General',
-      status: raw.status || 'Completed',
+      status: statusStr,
       completedBy: {
         fullName: raw.completedBy?.fullName || raw.completedBy?.name || 'Officer',
         rank: raw.completedBy?.rank || 'Crew',
@@ -17,8 +28,19 @@ export const historyMapperService = {
       measurement: raw.measurement || '',
       postponedReason: raw.reason || raw.postponedReason || '',
       taskGroup: snapshot.taskGroup || raw.taskGroup || 'Daily',
-      issueDate: raw.issueDate || raw.issue_date || raw.createdAt || new Date().toISOString(),
+      issueDate: raw.completionDate || raw.postponedAt || raw.issueDate || raw.issue_date || raw.updatedAt || raw.createdAt || new Date().toISOString(),
       createdAt: raw.createdAt || '',
+      hasIssue: !!raw.hasIssue || !!raw.issue,
+      issue: raw.issue ? {
+        id: raw.issue._id || raw.issue.id,
+        description: raw.issue.description || '',
+        severity: raw.issue.severity || 'MINOR',
+        status: raw.issue.status || 'OPEN',
+        imageUrl: raw.issue.imageUrl || null,
+        note: raw.issue.note || null,
+        issueDate: raw.issue.issueDate || null,
+        resolvedAt: raw.issue.resolvedAt || null,
+      } : null,
     };
   },
 

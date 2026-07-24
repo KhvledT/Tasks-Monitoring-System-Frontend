@@ -116,12 +116,14 @@ export const useDashboard = (): UseDashboardResult => {
     }));
   }, [tasksData]);
 
-  // Extract critical issues (Critical and Major severity levels)
+  // Extract active critical issues (Critical and Major severity levels)
   const criticalIssues = React.useMemo(() => {
     const issues = issuesData?.result || [];
     if (!Array.isArray(issues)) return [];
     return issues.filter((issue: any) =>
-      issue.severity === 'CRITICAL' || issue.severity === 'MAJOR'
+      (issue.severity === 'CRITICAL' || issue.severity === 'MAJOR') &&
+      String(issue.status).toUpperCase() !== 'RESOLVED' &&
+      String(issue.status).toUpperCase() !== 'CLOSED'
     );
   }, [issuesData]);
 

@@ -35,9 +35,23 @@ export const LoginForm = () => {
         password: data.password,
       });
       toast.success('Logged in successfully!');
-      navigate(ROUTES.DASHBOARD);
+      navigate(ROUTES.WORKSPACE_HOME);
     } catch (err: any) {
       const backendMessage = err.response?.data?.message || 'Network unavailable. Please check connection.';
+      const lowerMsg = backendMessage.toLowerCase();
+
+      // If email is unverified, redirect to OTP verification page with pre-filled email
+      if (
+        lowerMsg.includes('confirm your email') ||
+        lowerMsg.includes('verify your email') ||
+        lowerMsg.includes('email not verified') ||
+        lowerMsg.includes('email first')
+      ) {
+        toast.error('Email is not verified. A new verification OTP code has been sent to your email.');
+        navigate(ROUTES.VERIFY_EMAIL, { state: { email: data.email } });
+        return;
+      }
+
       setServerError(backendMessage);
       toast.error(backendMessage);
     }

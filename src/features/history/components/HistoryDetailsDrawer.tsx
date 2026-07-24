@@ -160,6 +160,35 @@ export const HistoryDetailsDrawer: React.FC<HistoryDetailsDrawerProps> = ({
                     </p>
                   </div>
                 )}
+
+                {/* Reported Machinery Defect Details */}
+                {item.issue && (
+                  <div className="flex flex-col gap-2.5 bg-red-950/30 border border-red-900/50 p-4 rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
+                        ⚠️ Defect ({item.issue.severity})
+                      </span>
+                      <span className="text-[10px] font-bold text-red-300 bg-red-900/40 px-2 py-0.5 rounded border border-red-800/40">
+                        {item.issue.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-red-200 font-medium leading-relaxed">
+                      {item.issue.description}
+                    </p>
+                    {item.issue.note && (
+                      <p className="text-[11px] text-zinc-400 italic">
+                        Note: {item.issue.note}
+                      </p>
+                    )}
+                    {item.issue.imageUrl && (
+                      <img
+                        src={item.issue.imageUrl}
+                        alt="Defect Attachment"
+                        className="w-full h-36 object-cover rounded-lg border border-red-800/40 mt-1"
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

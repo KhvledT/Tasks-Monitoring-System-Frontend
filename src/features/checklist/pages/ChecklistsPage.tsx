@@ -1,4 +1,7 @@
+import { CHECKLIST_KEYS } from '../../../constants/query-keys/checklist';
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { useChecklist } from '../hooks/useChecklist';
 import { useCompleteTask } from '../hooks/useCompleteTask';
 import { usePostponeTask } from '../hooks/usePostponeTask';
@@ -10,11 +13,15 @@ import { ChecklistEmptyState } from '../components/ChecklistEmptyState';
 import { ChecklistSkeleton } from '../components/ChecklistSkeleton';
 import { CompleteTaskModal } from '../components/CompleteTaskModal';
 import { PostponeTaskModal } from '../components/PostponeTaskModal';
+import { VesselTaskEditorModal } from '../components/VesselTaskEditorModal';
+import { EditTaskModal } from '../components/EditTaskModal';
+import { checklistApi } from '../api/checklist.api';
 import { useActiveVessel } from '../../../shared/hooks/useActiveVessel';
 import { useActiveWatch } from '../../watchSession/hooks/useWatchSession';
 import type { ChecklistTask } from '../types/checklist.types';
 
 export const ChecklistsPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const { activeVesselId, isArchiveMode } = useActiveVessel();
   const { data: activeWatch } = useActiveWatch(activeVesselId || undefined);
 
@@ -39,13 +46,36 @@ export const ChecklistsPage: React.FC = () => {
 
   // Page-Level Modal State Management
   const [selectedTask, setSelectedTask] = useState<ChecklistTask | null>(null);
+  const [taskToEdit, setTaskToEdit] = useState<ChecklistTask | null>(null);
   const [activeModal, setActiveModal] = useState<'complete' | 'postpone' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isBulkCompleting, setIsBulkCompleting] = useState(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
 
   const handleTaskAction = (task: ChecklistTask, action: 'complete' | 'postpone') => {
     setSelectedTask(task);
     setActiveModal(action);
     setSubmitError(null);
+  };
+
+  const handleEditTask = (task: ChecklistTask) => {
+    setTaskToEdit(task);
+  };
+
+  const handleDeleteTask = async (task: ChecklistTask) => {
+    if (!activeVesselId) return;
+    const confirmDelete = window.confirm(`Are you sure you want to delete the task "${task.title}"?`);
+    if (!confirmDelete) return;
+
+    const taskId = task.taskDefinitionId || task.id;
+    try {
+      await checklistApi.deleteCustomTask(activeVesselId, taskId);
+      toast.success(`Task "${task.title}" deleted successfully!`);
+      await queryClient.invalidateQueries({ queryKey: CHECKLIST_KEYS.all() });
+      await queryClient.refetchQueries({ queryKey: CHECKLIST_KEYS.all() });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete task');
+    }
   };
 
   const handleCompleteSubmit = async (recordId: string, notes?: string, measurement?: string) => {
@@ -72,6 +102,44 @@ export const ChecklistsPage: React.FC = () => {
     }
   };
 
+  const handleBulkSignOff = async () => {
+    if (!activeWatch) {
+      toast.error('No active watch session found. Please start a watch first.');
+      return;
+    }
+
+    const uncompletedTasks = categories
+      .flatMap((cat) => cat.tasks)
+      .filter((t) => String(t.status) !== '1' && String(t.status).toLowerCase() !== 'completed');
+
+    if (uncompletedTasks.length === 0) {
+      toast.success('All routine checks in this view are already completed!');
+      return;
+    }
+
+    if (!confirm(`Execute bulk sign-off for ${uncompletedTasks.length} uncompleted routine checks?`)) {
+      return;
+    }
+
+    setIsBulkCompleting(true);
+    let successCount = 0;
+    try {
+      for (const t of uncompletedTasks) {
+        try {
+          await completeTask({ recordId: t.id, data: { notes: 'Bulk routine sign-off' } });
+          successCount++;
+        } catch (e) {
+          console.error('Failed to complete task in bulk:', t.id, e);
+        }
+      }
+      toast.success(`Successfully signed off ${successCount} routine checks!`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to complete bulk sign-off');
+    } finally {
+      setIsBulkCompleting(false);
+    }
+  };
+
   const handleModalClose = () => {
     setActiveModal(null);
     setSelectedTask(null);
@@ -84,7 +152,6 @@ export const ChecklistsPage: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-fade-in">
-      {/* 1. Page Header with active vessel context and date picker */}
       <ChecklistHeader
         vesselName={activeVesselName}
         selectedDate={selectedDate}
@@ -112,7 +179,6 @@ export const ChecklistsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Checklist Statistics Bar */}
       {categories.length > 0 && (() => {
         const allTasks = categories.flatMap(cat => cat.tasks);
         const total = allTasks.length;
@@ -145,49 +211,70 @@ export const ChecklistsPage: React.FC = () => {
               <span className="text-lg font-bold text-red-400">{issuesCount}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Completion Rate</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Compliance Rate</span>
               <span className="text-lg font-bold text-sky-400">{compliance}%</span>
             </div>
           </div>
         );
       })()}
 
+      {categories.length > 0 && !isArchiveMode && (
+        <div className="bg-white border border-zinc-200 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-extrabold text-black uppercase tracking-wider">
+              Bulk Sign-Off Inspections Mode
+            </span>
+            <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold border border-emerald-200">
+              Quick Checks Active
+            </span>
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            {activeVesselId && !isArchiveMode && (
+              <button
+                onClick={() => setIsCustomModalOpen(true)}
+                className="px-4 py-2 bg-[#0055d4] hover:bg-[#003fa3] text-xs font-extrabold text-white rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                ✏️ Update Tasks
+              </button>
+            )}
+            <button
+              onClick={handleBulkSignOff}
+              disabled={isBulkCompleting}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-xs font-extrabold text-white rounded-xl transition cursor-pointer shadow-xs"
+            >
+              {isBulkCompleting ? 'Signing Off Checks...' : '✓ Quick Bulk Sign-Off All Routine Checks'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {error ? (
-        /* Error Alert State */
-        <div className="p-5 bg-red-950/20 border border-red-900/40 rounded-2xl flex flex-col gap-2.5 shadow-xl">
+        <div className="p-5 bg-red-955/20 border border-red-900/40 rounded-2xl flex flex-col gap-2.5 shadow-xl">
           <div className="flex items-center gap-2 text-red-400 font-bold text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
             </svg>
-            Failed to Load Checklists
+            Error loading checklist definitions
           </div>
-          <p className="text-xs text-zinc-400 font-medium leading-relaxed">
-            There was a problem loading checklist logs for this date.
-          </p>
-          <div className="bg-black/40 border border-zinc-900/60 p-3.5 rounded-xl font-mono text-xs text-red-350 select-all">
-            {error.message || 'Unknown server or network error.'}
-          </div>
+          <p className="text-xs text-zinc-400 font-mono pl-7">{error.message}</p>
         </div>
       ) : (
-        /* Checklists Workspace Layout */
         <>
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between">
-            <ChecklistFilters selectedGroup={selectedGroup} onChange={setSelectedGroup} />
-            <ChecklistSearch value={searchQuery} onChange={setSearchQuery} />
-          </div>
+          <ChecklistFilters selectedGroup={selectedGroup} onChange={setSelectedGroup} />
+          
+          <ChecklistSearch value={searchQuery} onChange={setSearchQuery} />
 
           {isEmpty ? (
-            /* 2. Empty State View */
             <ChecklistEmptyState />
           ) : (
-            /* 3. Normalized categories layout */
             <div className="flex flex-col mt-2">
               {categories.map((group) => (
                 <ChecklistCategory
                   key={group.category.id}
                   group={group}
                   onTaskAction={handleTaskAction}
+                  onEditTask={handleEditTask}
+                  onDeleteTask={handleDeleteTask}
                   isArchiveMode={isArchiveMode}
                 />
               ))}
@@ -196,7 +283,6 @@ export const ChecklistsPage: React.FC = () => {
         </>
       )}
 
-      {/* Page-level modals coordinates */}
       <CompleteTaskModal
         isOpen={activeModal === 'complete'}
         task={selectedTask}
@@ -213,6 +299,21 @@ export const ChecklistsPage: React.FC = () => {
         errorMsg={submitError}
         onSubmit={handlePostponeSubmit}
         onCancel={handleModalClose}
+      />
+
+      {activeVesselId && (
+        <VesselTaskEditorModal
+          vesselId={activeVesselId}
+          vesselName={activeVesselName}
+          isOpen={isCustomModalOpen}
+          onClose={() => setIsCustomModalOpen(false)}
+        />
+      )}
+
+      <EditTaskModal
+        isOpen={!!taskToEdit}
+        task={taskToEdit}
+        onClose={() => setTaskToEdit(null)}
       />
     </div>
   );

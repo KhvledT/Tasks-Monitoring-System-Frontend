@@ -1,5 +1,6 @@
 export interface ChecklistTask {
   id: string;
+  taskDefinitionId?: string;
   title: string;
   description: string;
   displayOrder: number;

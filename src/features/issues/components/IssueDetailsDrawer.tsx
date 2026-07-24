@@ -4,6 +4,7 @@ import { useDeleteIssue } from "../hooks/useDeleteIssue";
 import { useUpdateIssue } from "../hooks/useUpdateIssue";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { ImagePreviewModal } from "../../../shared/components/ImagePreviewModal";
 
 interface IssueDetailsDrawerProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const IssueDetailsDrawer: React.FC<IssueDetailsDrawerProps> = ({
   const [note, setNote] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Sync form state when issue changes
   useEffect(() => {
@@ -332,7 +334,11 @@ export const IssueDetailsDrawer: React.FC<IssueDetailsDrawerProps> = ({
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                       Photo Evidence Attachment
                     </span>
-                    <div className="relative rounded-xl overflow-hidden border border-zinc-800 bg-black/40 aspect-video group">
+                    <div
+                      onClick={() => setIsPreviewOpen(true)}
+                      className="relative rounded-xl overflow-hidden border border-zinc-800 bg-black/40 aspect-video group cursor-pointer"
+                      title="Click to preview full-size evidence image"
+                    >
                       <img
                         src={issue.imageUrl}
                         alt="Issue Attachment Evidence"
@@ -377,6 +383,14 @@ export const IssueDetailsDrawer: React.FC<IssueDetailsDrawerProps> = ({
           </div>
         </div>
       )}
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        isOpen={isPreviewOpen}
+        src={issue?.imageUrl || null}
+        title={`Defect Evidence Attachment: ${issue?.description || ''}`}
+        onClose={() => setIsPreviewOpen(false)}
+      />
     </AnimatePresence>
   );
 };

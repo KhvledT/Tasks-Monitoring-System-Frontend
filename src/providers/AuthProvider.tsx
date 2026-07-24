@@ -57,8 +57,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(false);
   };
 
-  const updateUser = (updatedUser: User) => {
-    setUser(updatedUser);
+  const updateUser = (updatedUser: Partial<User> | any) => {
+    setUser((prev) => {
+      const normalized: User = {
+        id: String(updatedUser.id || updatedUser._id || prev?.id || ''),
+        email: updatedUser.email || prev?.email || '',
+        fullName: updatedUser.fullName || prev?.fullName || '',
+        role: updatedUser.role || prev?.role || 'USER',
+        rank: updatedUser.rank || prev?.rank || '',
+        signOnDate: updatedUser.signOnDate || prev?.signOnDate || '',
+        isActive: updatedUser.isActive !== undefined ? updatedUser.isActive : prev?.isActive ?? true,
+        isVerified: updatedUser.isVerified !== undefined ? updatedUser.isVerified : prev?.isVerified ?? true,
+        avatarUrl: updatedUser.avatarUrl !== undefined ? updatedUser.avatarUrl : prev?.avatarUrl || '',
+        phone: updatedUser.phone !== undefined ? updatedUser.phone : prev?.phone || '',
+        company: updatedUser.company !== undefined ? updatedUser.company : prev?.company || '',
+        settings: updatedUser.settings || prev?.settings || {},
+      };
+      return normalized;
+    });
   };
 
   // Register the Axios token-expired global logout handler
@@ -108,8 +124,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await apiClient.get('/auth/me');
         const profile = response.data.result;
         
-        setUser(profile);
-        setIsAuthenticated(true);
+        if (profile) {
+          setUser({
+            ...profile,
+            id: profile.id || profile._id,
+            avatarUrl: profile.avatarUrl || '',
+          });
+          setIsAuthenticated(true);
+        }
       } catch (error) {
         console.error('Failed to retrieve profile:', error);
         logout();

@@ -12,7 +12,7 @@ export const useActivateVessel = () => {
 
   return useMutation({
     mutationFn: (vesselId: string) => vesselApi.activateVessel(vesselId),
-    onSuccess: async () => {
+    onSuccess: async (data, vesselId) => {
       // 1. Invalidate Vessel Query
       queryClient.invalidateQueries({ queryKey: VESSEL_KEYS.list() });
 
@@ -26,10 +26,14 @@ export const useActivateVessel = () => {
       });
 
       // 3. Read Updated Active Vessel
-      const active = response.find((v: any) => v.isActive === true);
+      const active =
+        response.find((v: any) => v.isActive === true) ||
+        response.find((v: any) => String(v._id || v.id) === String(vesselId)) ||
+        (data as any)?.result ||
+        (data as any);
 
       // 4. Update VesselProvider
-      setActiveVessel(active || null);
+      setActiveVessel((active as any) || null);
 
       // 5. Navigate Dashboard
       navigate(ROUTES.DASHBOARD, { replace: true });

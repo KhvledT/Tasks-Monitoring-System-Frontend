@@ -5,6 +5,7 @@ import { useIssueSearch } from './useIssueSearch';
 import { issueFilterService } from '../services/issue-filter.service';
 import { issueSortService } from '../services/issue-sort.service';
 import type { IssueItem } from '../types/issue.types';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 export interface UseIssuesResult {
   issues: IssueItem[];
@@ -23,6 +24,7 @@ export const useIssues = (): UseIssuesResult => {
   const { activeVessel, activeVesselId } = useActiveVessel();
   const { sortBy, setSortBy } = useIssueFilters();
   const { searchQuery, setSearchQuery } = useIssueSearch();
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const vesselId = activeVesselId || '';
 
@@ -39,7 +41,7 @@ export const useIssues = (): UseIssuesResult => {
     : null;
 
   // Filter issues
-  let processed = issueFilterService.filterIssuesBySearch(rawIssues, searchQuery);
+  let processed = issueFilterService.filterIssuesBySearch(rawIssues, debouncedSearchQuery);
 
   // Sort issues
   if (sortBy === 'date') {

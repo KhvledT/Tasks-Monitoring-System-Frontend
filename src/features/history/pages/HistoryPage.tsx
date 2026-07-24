@@ -103,17 +103,6 @@ export const HistoryPage: React.FC = () => {
         item={selectedHistoryItem}
         onClose={closeDrawer}
       />
-
-      {/* Floating Action Button */}
-      <button
-        type="button"
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary hover:bg-[#003fa3] text-white rounded-full shadow-lg flex items-center justify-center transition active:scale-[0.95] cursor-pointer z-50"
-        title="Add new log entry"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      </button>
     </div>
   );
 };

@@ -1,20 +1,27 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
 import { useActiveVessel } from '../shared/hooks/useActiveVessel';
+import { useAuth } from '../shared/hooks/useAuth';
 import { PageLoader } from '../shared/components/loading';
-import { ROUTES } from '../constants/routes';
+import { VesselOperationalGuard } from './VesselOperationalGuard';
 
 export const VesselGuard: React.FC = () => {
-  const { activeVessel, isCheckingVessel } = useActiveVessel();
+  const { isCheckingVessel } = useActiveVessel();
+  const { user } = useAuth();
 
   if (isCheckingVessel) {
     return <PageLoader />;
   }
 
-  if (!activeVessel) {
-    return <Navigate to={ROUTES.SELECT_VESSEL} replace />;
+  // Super Admin does NOT require an active vessel selected
+  if (user?.role === 'SUPER_ADMIN') {
+    return <Outlet />;
   }
 
-  return <Outlet />;
+  return (
+    <VesselOperationalGuard>
+      <Outlet />
+    </VesselOperationalGuard>
+  );
 };
 export default VesselGuard;

@@ -5,6 +5,7 @@ import { useChecklistFilters } from './useChecklistFilters';
 import { useChecklistSearch } from './useChecklistSearch';
 import { checklistFilterService } from '../services/checklist-filter.service';
 import type { ChecklistCategoryGroup } from '../types/checklist.types';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 export interface UseChecklistResult {
   categories: ChecklistCategoryGroup[];
@@ -27,6 +28,7 @@ export const useChecklist = (): UseChecklistResult => {
   const { selectedDate, setSelectedDate, formattedDate } = useChecklistDate();
   const { selectedGroup, setSelectedGroup } = useChecklistFilters();
   const { searchQuery, setSearchQuery } = useChecklistSearch();
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const vesselId = activeVesselId || '';
 
@@ -44,7 +46,7 @@ export const useChecklist = (): UseChecklistResult => {
 
   // Apply sequential filtering using our pure filter service
   let filtered = checklistFilterService.filterTasksByGroup(rawCategories, selectedGroup);
-  filtered = checklistFilterService.filterTasksBySearch(filtered, searchQuery);
+  filtered = checklistFilterService.filterTasksBySearch(filtered, debouncedSearchQuery);
 
   const isEmpty = !isLoading && !error && filtered.length === 0;
 

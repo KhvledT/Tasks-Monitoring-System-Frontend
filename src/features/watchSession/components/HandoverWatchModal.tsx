@@ -93,9 +93,12 @@ export const HandoverWatchModal: React.FC<HandoverWatchModalProps> = ({
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  Incoming Officer Email
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                    Incoming Officer Email
+                  </label>
+                  <span className="text-[10px] text-sky-400 font-bold">Relieving Watchkeeper</span>
+                </div>
                 <input
                   type="email"
                   required

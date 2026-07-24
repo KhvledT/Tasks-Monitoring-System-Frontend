@@ -12,7 +12,7 @@ export const GuestRoute: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={ROUTES.DASHBOARD} replace />;
+    return <Navigate to={ROUTES.WORKSPACE_HOME} replace />;
   }
 
   return <Outlet />;

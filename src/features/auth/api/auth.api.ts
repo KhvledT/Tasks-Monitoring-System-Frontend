@@ -47,7 +47,7 @@ export const authApi = {
   },
 
   resetPassword: async (data: { email: string; otp: string; password: string; confirmPassword: string }) => {
-    const response = await apiClient.patch('/auth/reset-password', data);
+    const response = await apiClient.post('/auth/reset-password', data);
     return response.data;
   },
 };

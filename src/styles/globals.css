@@ -63,3 +63,37 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+/* Global focus-visible styling */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #0055d4 !important;
+  outline-offset: 2px !important;
+}
+
+/* Print layout optimizations */
+@media print {
+  aside,
+  header,
+  nav,
+  button,
+  input,
+  select,
+  .no-print,
+  .sticky {
+    display: none !important;
+  }
+  
+  body, main, .p-6, .p-8 {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+

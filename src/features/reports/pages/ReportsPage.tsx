@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useActiveVessel } from '../../../shared/hooks/useActiveVessel';
+import { useAuth } from '../../../shared/hooks/useAuth';
 import { useExportPdf } from '../../history/hooks/useExportPdf';
 import { useExportExcel } from '../../history/hooks/useExportExcel';
+import { useExportWord } from '../../history/hooks/useExportWord';
+import { checklistApi } from '../../checklist/api/checklist.api';
+import { issueApi } from '../../issues/api/issue.api';
 import { Card } from '@heroui/react';
 import { toast } from 'react-hot-toast';
 
 interface ReportTemplate {
   name: string;
-  format: 'PDF' | 'EXCEL' | 'CSV';
+  format: 'PDF' | 'EXCEL' | 'WORD' | 'CSV';
   pageSize: 'A4' | 'LETTER';
   orientation: 'PORTRAIT' | 'LANDSCAPE';
   margins: 'NORMAL' | 'NARROW' | 'WIDE';
@@ -32,12 +37,19 @@ interface ReportTemplate {
 }
 
 export const ReportsPage: React.FC = () => {
-  const { activeVessel, activeVesselId } = useActiveVessel();
+  const { user } = useAuth();
+  const { activeVessel, activeVesselId, viewedVesselId } = useActiveVessel();
+  const vesselId = viewedVesselId || activeVesselId;
   const { exportPdf, isExporting: isExportingPdf } = useExportPdf();
   const { exportExcel, isExporting: isExportingExcel } = useExportExcel();
+  const { exportWord, isExporting: isExportingWord } = useExportWord();
+
+  const defaultCompany = (activeVessel as any)?.company || (activeVessel?.vesselMode ? `${activeVessel.vesselMode.toUpperCase()} SHIPPING` : 'MARITIME OPERATIONS');
+  const defaultOfficer = user ? `${user.rank || 'Officer'} ${user.fullName || (user as any).name || ''}`.trim() : 'Chief Officer';
+  const defaultImo = (activeVessel as any)?.imo || (activeVessel as any)?.imoNumber ? `IMO ${(activeVessel as any).imo || (activeVessel as any).imoNumber}` : `VESSEL: ${activeVessel?.name ? activeVessel.name.toUpperCase() : 'WORKSPACE'}`;
 
   // Customizer States
-  const [format, setFormat] = useState<'PDF' | 'EXCEL' | 'CSV'>('PDF');
+  const [format, setFormat] = useState<'PDF' | 'EXCEL' | 'WORD' | 'CSV'>('PDF');
   const [pageSize, setPageSize] = useState<'A4' | 'LETTER'>('A4');
   const [orientation, setOrientation] = useState<'PORTRAIT' | 'LANDSCAPE'>('PORTRAIT');
   const [margins, setMargins] = useState<'NORMAL' | 'NARROW' | 'WIDE'>('NORMAL');
@@ -51,7 +63,7 @@ export const ReportsPage: React.FC = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [companyLogoName, setCompanyLogoName] = useState('Global Ocean Shipping');
+  const [companyLogoName, setCompanyLogoName] = useState(defaultCompany);
   
   // Image Base64 Upload states
   const [companyLogoBase64, setCompanyLogoBase64] = useState<string>('');
@@ -66,8 +78,51 @@ export const ReportsPage: React.FC = () => {
   const [signaturePosition, setSignaturePosition] = useState<string>('Last Page');
 
   // Additional Metadata
-  const [officerName, setOfficerName] = useState('Chief Officer John Doe');
-  const [imoNumber, setImoNumber] = useState('IMO 9123456');
+  const [officerName, setOfficerName] = useState(defaultOfficer);
+  const [imoNumber, setImoNumber] = useState(defaultImo);
+
+  // Synchronize state when activeVessel or user updates
+  useEffect(() => {
+    if (activeVessel) {
+      setCompanyLogoName(defaultCompany);
+      setImoNumber(defaultImo);
+    }
+  }, [activeVessel?.name, activeVessel?.type, activeVessel?.vesselMode]);
+
+  useEffect(() => {
+    if (user) {
+      setOfficerName(defaultOfficer);
+    }
+  }, [user?.fullName, user?.rank]);
+
+  // Fetch real live tasks for report preview
+  const todayStr = React.useMemo(() => new Date().toISOString().split('T')[0], []);
+  const { data: tasksData } = useQuery({
+    queryKey: ['reports-live-tasks', vesselId, todayStr],
+    queryFn: () => checklistApi.getChecklistRecords(vesselId || '', todayStr),
+    enabled: !!vesselId,
+  });
+
+  // Fetch real live issues for report preview
+  const { data: issuesData } = useQuery({
+    queryKey: ['reports-live-issues', vesselId],
+    queryFn: () => issueApi.getIssues(vesselId || ''),
+    enabled: !!vesselId,
+  });
+
+  const liveTasks = React.useMemo(() => {
+    const raw = tasksData?.result || [];
+    if (!Array.isArray(raw)) return [];
+    if (raw.length > 0 && 'tasks' in raw[0]) {
+      return raw.flatMap((g: any) => g.tasks || []);
+    }
+    return raw;
+  }, [tasksData]);
+
+  const liveIssues = React.useMemo(() => {
+    const raw = issuesData?.result || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [issuesData]);
 
   // Column Customization
   const [visibleColumns, setVisibleColumns] = useState<string[]>(['Date', 'Task', 'Category', 'Status', 'Notes']);
@@ -234,6 +289,9 @@ export const ReportsPage: React.FC = () => {
       if (format === 'PDF') {
         await exportPdf(activeVesselId, config);
         toast.success('PDF compliance report generated and download initialized.');
+      } else if (format === 'WORD') {
+        await exportWord(activeVesselId, config);
+        toast.success('Word (.docx) compliance report generated and download initialized.');
       } else {
         await exportExcel(activeVesselId, config);
         toast.success('Spreadsheet report generated and download initialized.');
@@ -299,8 +357,8 @@ export const ReportsPage: React.FC = () => {
             {/* Format Selection */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Export Format</label>
-              <div className="grid grid-cols-3 gap-2 bg-zinc-950 p-1 rounded-xl border border-zinc-900">
-                {(['PDF', 'EXCEL', 'CSV'] as const).map((f) => (
+              <div className="grid grid-cols-4 gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-900">
+                {(['PDF', 'EXCEL', 'WORD', 'CSV'] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setFormat(f)}
@@ -587,10 +645,10 @@ export const ReportsPage: React.FC = () => {
 
             <button
               onClick={handleGenerate}
-              disabled={isExportingPdf || isExportingExcel}
+              disabled={isExportingPdf || isExportingExcel || isExportingWord}
               className="w-full mt-2 py-3 bg-sky-500 hover:bg-sky-400 disabled:bg-sky-500/50 text-xs font-bold text-black rounded-xl transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              {isExportingPdf || isExportingExcel ? 'Compiling Report...' : 'Compile & Export'}
+              {isExportingPdf || isExportingExcel || isExportingWord ? 'Compiling Report...' : 'Compile & Export'}
             </button>
           </Card>
         </div>
@@ -652,36 +710,47 @@ export const ReportsPage: React.FC = () => {
               <div className="flex flex-col gap-2 border-b border-zinc-900/40 pb-4">
                 <h4 className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">Completed Checklist Tasks</h4>
                 
-                {/* Simulated Table with selected columns */}
-                <div className="overflow-x-auto mt-1 border border-zinc-900 rounded-lg">
-                  <table className="w-full text-left text-[10px] text-zinc-400">
-                    <thead className="bg-zinc-900/60 text-zinc-500 uppercase tracking-wider font-bold">
-                      <tr>
-                        {visibleColumns.map(col => (
-                          <th key={col} className="p-2 border-b border-zinc-900">{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-zinc-900/45">
-                        {visibleColumns.includes('Date') && <td className="p-2 font-mono">2026-07-20</td>}
-                        {visibleColumns.includes('Task') && <td className="p-2 font-bold text-zinc-300">Engine Oil Pressure Audit</td>}
-                        {visibleColumns.includes('Category') && <td className="p-2">Machinery</td>}
-                        {visibleColumns.includes('Status') && <td className="p-2 text-emerald-400 font-bold">COMPLETED</td>}
-                        {visibleColumns.includes('Notes') && <td className="p-2 italic text-zinc-500">Pressure normal (5.4 bar)</td>}
-                        {visibleColumns.includes('Signature') && <td className="p-2 text-zinc-500">{officerName.substring(0, 10)}...</td>}
-                      </tr>
-                      <tr>
-                        {visibleColumns.includes('Date') && <td className="p-2 font-mono">2026-07-20</td>}
-                        {visibleColumns.includes('Task') && <td className="p-2 font-bold text-zinc-300">Auxiliary Generator Signal checks</td>}
-                        {visibleColumns.includes('Category') && <td className="p-2">Electrical</td>}
-                        {visibleColumns.includes('Status') && <td className="p-2 text-emerald-400 font-bold">COMPLETED</td>}
-                        {visibleColumns.includes('Notes') && <td className="p-2 italic text-zinc-500">Auto-start verified ok.</td>}
-                        {visibleColumns.includes('Signature') && <td className="p-2 text-zinc-500">{officerName.substring(0, 10)}...</td>}
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                {liveTasks.length === 0 ? (
+                  <div className="p-3 text-[10px] text-zinc-500 italic bg-zinc-950/40 border border-zinc-900 rounded-lg">
+                    No active checklist tasks recorded for current vessel workspace.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto mt-1 border border-zinc-900 rounded-lg">
+                    <table className="w-full text-left text-[10px] text-zinc-400">
+                      <thead className="bg-zinc-900/60 text-zinc-500 uppercase tracking-wider font-bold">
+                        <tr>
+                          {visibleColumns.map(col => (
+                            <th key={col} className="p-2 border-b border-zinc-900">{col}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {liveTasks.slice(0, 5).map((t: any, idx: number) => {
+                          const dateVal = t.completionDate || t.updatedAt || t.createdAt || 'Today';
+                          const dateStr = String(dateVal).includes('T') ? String(dateVal).split('T')[0] : String(dateVal);
+                          const title = t.taskSnapshot?.title || t.title || 'Inspection Task';
+                          const category = t.taskSnapshot?.categoryName || t.categoryName || 'Operational';
+                          const status = String(t.status) === '1' || String(t.status).toLowerCase() === 'completed' ? 'COMPLETED' : String(t.status) === '2' || String(t.status).toLowerCase() === 'postponed' ? 'POSTPONED' : 'PENDING';
+                          const notes = t.notes || 'Routine check verified';
+                          return (
+                            <tr key={t.id || t._id || idx} className="border-b border-zinc-900/45">
+                              {visibleColumns.includes('Date') && <td className="p-2 font-mono">{dateStr}</td>}
+                              {visibleColumns.includes('Task') && <td className="p-2 font-bold text-zinc-300">{title}</td>}
+                              {visibleColumns.includes('Category') && <td className="p-2">{category}</td>}
+                              {visibleColumns.includes('Status') && (
+                                <td className={`p-2 font-bold ${status === 'COMPLETED' ? 'text-emerald-400' : status === 'POSTPONED' ? 'text-amber-400' : 'text-zinc-400'}`}>
+                                  {status}
+                                </td>
+                              )}
+                              {visibleColumns.includes('Notes') && <td className="p-2 italic text-zinc-500">{notes}</td>}
+                              {visibleColumns.includes('Signature') && <td className="p-2 text-zinc-500">{officerName.substring(0, 12)}...</td>}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
@@ -689,20 +758,34 @@ export const ReportsPage: React.FC = () => {
             {includeIssues && (
               <div className="flex flex-col gap-2 border-b border-zinc-900/40 pb-4">
                 <h4 className="text-[11px] font-bold text-red-400 uppercase tracking-wider">Reported Defects & Machinery Issues</h4>
-                <div className="text-[11px] text-zinc-450 flex flex-col gap-2 pl-3 border-l border-zinc-900 mt-1">
-                  <div className="flex flex-col gap-1 p-2.5 bg-red-955/5 border border-red-955/20 rounded-lg">
-                    <div className="flex justify-between items-center text-[10px]">
-                      <span className="font-bold text-zinc-300">• Hydraulic Valve #4 Minor Leakage</span>
-                      <span className="text-red-400 font-bold uppercase tracking-wider text-[9px] bg-red-950/20 px-1.5 py-0.2 rounded border border-red-900/30">MAJOR DEFECT</span>
-                    </div>
-                    <span className="text-[9px] text-zinc-550 italic font-medium">Logged by: {officerName}</span>
-                    {includeImages && (
-                      <div className="w-1/3 aspect-video bg-zinc-900 border border-zinc-850 rounded flex items-center justify-center text-[9px] text-zinc-650 mt-1">
-                        Photo Evidence Attached
-                      </div>
-                    )}
+                {liveIssues.length === 0 ? (
+                  <div className="p-3 text-[10px] text-zinc-500 italic bg-zinc-950/40 border border-zinc-900 rounded-lg">
+                    No machinery defects or equipment issues reported for current vessel.
                   </div>
-                </div>
+                ) : (
+                  <div className="text-[11px] text-zinc-450 flex flex-col gap-2 pl-3 border-l border-zinc-900 mt-1">
+                    {liveIssues.slice(0, 3).map((iss: any, idx: number) => (
+                      <div key={iss._id || iss.id || idx} className="flex flex-col gap-1 p-2.5 bg-red-955/5 border border-red-955/20 rounded-lg">
+                        <div className="flex justify-between items-center text-[10px]">
+                          <span className="font-bold text-zinc-300">• {iss.description}</span>
+                          <span className="text-red-400 font-bold uppercase tracking-wider text-[9px] bg-red-950/20 px-1.5 py-0.2 rounded border border-red-900/30">
+                            {iss.severity || 'DEFECT'}
+                          </span>
+                        </div>
+                        <span className="text-[9px] text-zinc-550 italic font-medium">Logged by: {officerName}</span>
+                        {includeImages && (
+                          <div className="w-1/3 aspect-video bg-zinc-900 border border-zinc-850 rounded flex items-center justify-center text-[9px] text-zinc-650 mt-1 overflow-hidden">
+                            {iss.imageUrl ? (
+                              <img src={iss.imageUrl} alt="Defect Attachment" className="w-full h-full object-cover" />
+                            ) : (
+                              <span>Photo Evidence Attached</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

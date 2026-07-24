@@ -45,12 +45,23 @@ export class ErrorBoundary extends Component<Props, State> {
                 {this.state.error?.message || 'Unknown Exception'}
               </code>
             </p>
-            <button
-              onClick={this.handleReload}
-              className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-500 rounded-lg font-medium transition text-white"
-            >
-              Restart Bridge Logbook
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={this.handleReload}
+                className="w-full py-2.5 px-4 bg-primary hover:bg-[#003fa3] rounded-lg font-bold transition text-white cursor-pointer active-btn-trigger"
+              >
+                Restart Bridge Logbook
+              </button>
+              <button
+                onClick={() => {
+                  this.setState({ hasError: false, error: null });
+                  window.location.href = '/';
+                }}
+                className="w-full py-2.5 px-4 border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 rounded-lg font-bold transition cursor-pointer active-btn-trigger"
+              >
+                Return to Home
+              </button>
+            </div>
           </div>
         </div>
       );

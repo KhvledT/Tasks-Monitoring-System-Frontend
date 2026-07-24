@@ -14,6 +14,17 @@ export interface HistoryItem {
   taskGroup: string;
   issueDate: string;
   createdAt?: string;
+  hasIssue?: boolean;
+  issue?: {
+    id?: string;
+    description: string;
+    severity: string;
+    status: string;
+    imageUrl?: string | null;
+    note?: string | null;
+    issueDate?: string;
+    resolvedAt?: string | null;
+  } | null;
 }
 
 export interface HistoryPagination {

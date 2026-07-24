@@ -31,6 +31,7 @@ export const useChecklistTasks = (vesselId: string, date: string, enabled = true
                   const snapshot = taskItem.task_definition_snapshot || {};
                   return {
                     id: taskItem._id || taskItem.id || String(Math.random()),
+                    taskDefinitionId: taskItem.taskDefinitionId || snapshot.taskDefinitionId || taskItem._id || taskItem.id,
                     title: snapshot.title || taskItem.title || 'Unknown Task',
                     description: snapshot.description || taskItem.description || '',
                     displayOrder: taskItem.displayOrder || snapshot.displayOrder || 1,
@@ -49,14 +50,15 @@ export const useChecklistTasks = (vesselId: string, date: string, enabled = true
             // Flat task record array
             const groupsMap = new Map<string, ChecklistTask[]>();
             const categoryMetaMap = new Map<string, any>();
- 
+
             rawResult.forEach((taskItem: any) => {
               const snapshot = taskItem.task_definition_snapshot || {};
               const categoryName = snapshot.categoryName || taskItem.categoryName || 'General';
               const categoryId = snapshot.categoryId || taskItem.categoryId || 'general';
- 
+
               const task: ChecklistTask = {
                 id: taskItem._id || taskItem.id || String(Math.random()),
+                taskDefinitionId: taskItem.taskDefinitionId || snapshot.taskDefinitionId || taskItem._id || taskItem.id,
                 title: snapshot.title || taskItem.title || 'Unknown Task',
                 description: snapshot.description || taskItem.description || '',
                 displayOrder: taskItem.displayOrder || snapshot.displayOrder || 1,

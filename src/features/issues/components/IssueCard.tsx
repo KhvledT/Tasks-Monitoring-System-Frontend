@@ -44,20 +44,7 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelect }) => {
     }
   };
 
-  const getStatusBadgeClass = (st: string) => {
-    switch (st) {
-      case 'OPEN':
-        return 'bg-red-950/20 text-red-400 border-red-900/10';
-      case 'IN_PROGRESS':
-        return 'bg-amber-950/20 text-amber-400 border-amber-900/10';
-      case 'RESOLVED':
-        return 'bg-emerald-950/20 text-emerald-400 border-emerald-900/10';
-      case 'CLOSED':
-        return 'bg-zinc-900/50 text-zinc-400 border-zinc-800';
-      default:
-        return 'bg-zinc-900/50 text-zinc-400 border-zinc-800';
-    }
-  };
+
 
   return (
     <motion.div
@@ -94,6 +81,12 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue, onSelect }) => {
             <p className="text-[11px] text-zinc-450 line-clamp-2 italic leading-normal border-l border-zinc-800 pl-2.5">
               {issue.note}
             </p>
+          )}
+
+          {issue.imageUrl && (
+            <div className="w-full h-32 rounded-xl overflow-hidden border border-zinc-850 bg-zinc-900 mt-1">
+              <img src={issue.imageUrl} alt="Defect evidence attachment" className="w-full h-full object-cover" />
+            </div>
           )}
         </div>
 

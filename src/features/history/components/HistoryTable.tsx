@@ -1,8 +1,8 @@
-import React from 'react';
-import type { HistoryItem } from '../types/history.types';
-import { HistoryStatusBadge } from './HistoryStatusBadge';
-import { formatDateTime } from '../../../shared/utils/date';
-import { Card } from '@heroui/react';
+import React from "react";
+import type { HistoryItem } from "../types/history.types";
+import { HistoryStatusBadge } from "./HistoryStatusBadge";
+import { formatDateTime } from "../../../shared/utils/date";
+import { Card } from "@heroui/react";
 
 interface HistoryTableProps {
   items: HistoryItem[];
@@ -26,12 +26,24 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
           <table className="min-w-full divide-y divide-zinc-900/60 text-left">
             <thead className="bg-zinc-950/80 font-sans">
               <tr>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">Date / Time (UTC)</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">Category</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">Task Title</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">Completed By</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider text-right">Details</th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">
+                  Date / Time (UTC)
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">
+                  Task Title
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider">
+                  Completed By
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-400 tracking-wider text-right">
+                  Details
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-900/40 bg-transparent text-xs font-medium text-zinc-300">

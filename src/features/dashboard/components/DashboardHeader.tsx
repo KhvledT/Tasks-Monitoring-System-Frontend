@@ -17,9 +17,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 pb-5 mb-8 font-sans">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-extrabold tracking-tight text-black">
-          Operational Overview
+          {vesselName || 'Operational Overview'}
         </h1>
         <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500 font-semibold mt-0.5">
+          <span className="text-zinc-650">Logged in: <strong className="text-black font-bold">{userName}</strong></span>
+          <span>&bull;</span>
           <span className="flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18" />

@@ -37,8 +37,46 @@ export const vesselApi = {
     return response.data;
   },
 
+  deactivateVessel: async (): Promise<any> => {
+    const response = await apiClient.patch('/vessel/deactivate');
+    return response.data;
+  },
+
   deleteVessel: async (vesselId: string): Promise<any> => {
     const response = await apiClient.delete(`/vessel/${vesselId}/delete`);
+    return response.data;
+  },
+
+  joinVessel: async (data: { inviteCode: string }): Promise<any> => {
+    const response = await apiClient.post('/vessel/join', data);
+    return response.data;
+  },
+
+  requestLeaveVessel: async (vesselId: string): Promise<any> => {
+    const response = await apiClient.post(`/vessel/${vesselId}/request-leave`);
+    try {
+      localStorage.setItem(`mtms_pending_leave_${vesselId}`, "true");
+      localStorage.setItem("mtms_has_pending_leave", "true");
+    } catch (e) {}
+    return response.data;
+  },
+
+  listLeaveRequests: async (vesselId: string): Promise<any> => {
+    const response = await apiClient.get(`/vessel/${vesselId}/leave-requests`);
+    return response.data?.result || [];
+  },
+
+  rejectLeaveRequest: async (vesselId: string, crewId: string): Promise<any> => {
+    const response = await apiClient.patch(`/vessel/${vesselId}/crew/${crewId}/reject-leave`);
+    return response.data;
+  },
+
+  replaceCrewMember: async (
+    vesselId: string,
+    crewId: string,
+    data: { replacementUserId?: string; replacementRequestId?: string; newRank?: string }
+  ): Promise<any> => {
+    const response = await apiClient.post(`/vessel/${vesselId}/crew/${crewId}/replace`, data);
     return response.data;
   },
 };

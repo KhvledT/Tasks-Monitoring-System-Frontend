@@ -12,6 +12,9 @@ import { CreateIssueModal } from '../components/CreateIssueModal';
 import { IssueDetailsDrawer } from '../components/IssueDetailsDrawer';
 import { IssuesEmptyState } from '../components/IssuesEmptyState';
 import { IssuesSkeleton } from '../components/IssuesSkeleton';
+import { useSocket } from '../../../providers/SocketProvider';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import type { IssueItem, CreateIssueRequest } from '../types/issue.types';
 
 export const IssuesPage: React.FC = () => {
@@ -28,6 +31,25 @@ export const IssuesPage: React.FC = () => {
   } = useIssues();
 
   const { isArchiveMode } = useActiveVessel();
+  const { socket } = useSocket();
+  const queryClient = useQueryClient();
+
+  // Listen for real-time socket updates for new or updated defects
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleIssueChange = () => {
+      queryClient.invalidateQueries({ queryKey: ['issues'] });
+    };
+
+    socket.on('issue_created', handleIssueChange);
+    socket.on('issue_updated', handleIssueChange);
+
+    return () => {
+      socket.off('issue_created', handleIssueChange);
+      socket.off('issue_updated', handleIssueChange);
+    };
+  }, [socket, queryClient]);
 
   // Task Selection Query
   const { data: taskOptions = [] } = useIssueTaskSelection(activeVesselId, !!activeVesselId);

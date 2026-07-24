@@ -35,14 +35,14 @@ export interface UseHistoryResult {
 }
 
 export const useHistory = (): UseHistoryResult => {
-  const { activeVessel, activeVesselId } = useActiveVessel();
+  const { activeVessel, activeVesselId, viewedVesselId } = useActiveVessel();
   
   const { selectedGroup, setSelectedGroup, selectedStatus, setSelectedStatus } = useHistoryFilters();
   const { searchQuery, debouncedQuery, setSearchQuery } = useHistorySearch();
   const { startDate, setStartDate, endDate, setEndDate } = useHistoryDateRange();
   const { page, setPage, pageSize, nextPage, prevPage, reset: resetPage } = useHistoryPagination(20);
 
-  const vesselId = activeVesselId || '';
+  const vesselId = viewedVesselId || activeVesselId || '';
 
   // 1. Reset pagination page count to 1 when filters or date ranges change
   useEffect(() => {

@@ -7,7 +7,7 @@ const issueFormSchema = z.object({
   taskRecordId: z.string().min(1, 'Please select a task to link this issue to.'),
   description: z.string().min(5, 'Description must be at least 5 characters long.'),
   note: z.string().optional(),
-  imageUrl: z.union([z.string().url('Invalid image URL format.'), z.string().length(0)]).optional(),
+  imageUrl: z.string().optional(),
   severity: z.enum(['CRITICAL', 'MAJOR', 'MINOR', 'OBSERVATION']),
 });
 

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { HistoryItem } from '../types/history.types';
 import { Card } from '@heroui/react';
+import { ImagePreviewModal } from '../../../shared/components/ImagePreviewModal';
 
 interface HistoryTimelineProps {
   items: HistoryItem[];
@@ -17,6 +18,7 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
   const getTimelineGroup = (dateStr: string): string => {
     try {
       const date = new Date(dateStr);
@@ -69,16 +71,16 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
     return Object.entries(buckets).filter(([_, list]) => list.length > 0);
   }, [items]);
 
-  const renderStatusBadge = (status: string) => {
+  const renderStatusBadge = (status: string, hasIssue?: boolean) => {
+    if (hasIssue) {
+      return <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase tracking-wider">DEFECT REPORTED</span>;
+    }
     const s = String(status).toLowerCase();
     if (s === 'completed' || s === '1') {
       return <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500 text-white uppercase tracking-wider">COMPLETED</span>;
     }
     if (s === 'postponed' || s === '2') {
       return <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500 text-white uppercase tracking-wider">POSTPONED</span>;
-    }
-    if (s === 'issue' || s.includes('issue')) {
-      return <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-red-500 text-white uppercase tracking-wider">ISSUE RAISED</span>;
     }
     return <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-blue-500 text-white uppercase tracking-wider">PERIODIC LOG</span>;
   };
@@ -94,9 +96,6 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
               {groupName}
             </h3>
-            <span className="text-[9px] text-zinc-600 font-mono">
-              {groupName === 'Today' ? 'Oct 20, 2026' : groupName === 'Yesterday' ? 'Oct 19, 2026' : 'Oct 15-18, 2026'}
-            </span>
           </div>
           <div className="border-l-2 border-zinc-900 ml-4 pl-6 flex flex-col gap-4">
             {groupItems.map((item) => (
@@ -109,7 +108,7 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-col gap-2 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {renderStatusBadge(item.status)}
+                        {renderStatusBadge(item.status, item.hasIssue || !!item.issue)}
                         <span className="text-[10px] text-zinc-550 font-mono">
                           {getFormattedTime(item.issueDate || item.createdAt || '')}
                         </span>
@@ -122,13 +121,29 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
                           {item.notes}
                         </p>
                       )}
+                      {item.issue && (
+                        <div className="mt-1 bg-red-950/30 border border-red-900/40 p-2.5 rounded-lg flex items-center gap-2 text-xs text-red-300">
+                          <span className="font-bold text-red-400">⚠️ Defect ({item.issue.severity}):</span>
+                          <span className="truncate">{item.issue.description}</span>
+                        </div>
+                      )}
                     </div>
-                    {/* Optional image thumbnail */}
-                    <div className="w-20 h-16 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0 border border-zinc-850">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-zinc-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                      </svg>
-                    </div>
+                    {/* Optional image thumbnail - ONLY display if image exists */}
+                    {item.issue?.imageUrl && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewImage({
+                            src: item.issue!.imageUrl!,
+                            title: `Defect Photo: ${item.title}`,
+                          });
+                        }}
+                        className="w-20 h-16 bg-zinc-900 rounded-lg flex items-center justify-center shrink-0 border border-zinc-850 overflow-hidden cursor-pointer hover:scale-105 transition shadow-sm"
+                        title="Click to preview photo evidence"
+                      >
+                        <img src={item.issue.imageUrl} alt="Defect Attachment" className="w-full h-full object-cover" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-zinc-900/50">
                     <div className="flex items-center gap-2">
@@ -169,6 +184,14 @@ export const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
           </button>
         </div>
       )}
+
+      {/* Image Preview Lightbox */}
+      <ImagePreviewModal
+        isOpen={!!previewImage}
+        src={previewImage?.src || null}
+        title={previewImage?.title || 'Defect Attachment Preview'}
+        onClose={() => setPreviewImage(null)}
+      />
     </div>
   );
 };
